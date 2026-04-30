@@ -1,0 +1,1689 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>處置中分盤交易 — 月線乖離率 2026-04-30</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:#0d1117;color:#e6edf3;font-family:-apple-system,'Segoe UI',sans-serif;font-size:14px;line-height:1.6}
+a{color:#58a6ff;text-decoration:none}
+
+nav{background:#0a0a16;border-bottom:1px solid #21262d;padding:12px 24px;display:flex;align-items:center;gap:12px;flex-wrap:wrap;position:sticky;top:0;z-index:100}
+nav h1{font-size:17px;font-weight:700}
+.badge{display:inline-block;padding:2px 8px;border-radius:12px;font-size:11px;font-weight:600}
+.badge-blue{background:#1c2e4a;color:#58a6ff}
+.badge-gray{background:#21262d;color:#8b949e}
+.badge-yellow{background:#3a2d00;color:#d29922}
+.update{margin-left:auto;font-size:11px;color:#8b949e}
+
+.container{max-width:1200px;margin:24px auto;padding:0 16px}
+
+.summary{display:flex;gap:12px;flex-wrap:wrap;margin-bottom:20px}
+.kpi{background:#161b22;border:1px solid #21262d;border-radius:8px;padding:14px 20px;text-align:center;min-width:110px}
+.kpi .num{font-size:26px;font-weight:700;color:#58a6ff}
+.kpi .lbl{font-size:11px;color:#8b949e;margin-top:2px}
+
+.card{background:#161b22;border:1px solid #21262d;border-radius:10px;overflow:hidden}
+.card-header{padding:14px 16px;border-bottom:1px solid #21262d;display:flex;align-items:center;gap:10px}
+.card-header h2{font-size:14px;font-weight:600;color:#8b949e;text-transform:uppercase;letter-spacing:.04em}
+
+table{width:100%;border-collapse:collapse;font-size:13px}
+th{text-align:left;padding:9px 12px;color:#8b949e;font-weight:600;font-size:11px;text-transform:uppercase;border-bottom:1px solid #21262d;white-space:nowrap;cursor:pointer;user-select:none}
+th:hover{color:#e6edf3}
+th.sort-asc::after{content:" ↑"}
+th.sort-desc::after{content:" ↓"}
+td{padding:8px 12px;border-bottom:1px solid #0d1117;white-space:nowrap}
+tr:last-child td{border-bottom:none}
+tr:hover td{background:#1c2128}
+.num-cell{text-align:right;font-variant-numeric:tabular-nums;font-family:'SF Mono','Fira Code',monospace}
+.code-cell{font-family:monospace;color:#58a6ff;font-weight:600}
+.code-cell a{color:inherit;text-decoration:none}
+.code-cell a:hover{text-decoration:underline}
+.name-cell{font-weight:500}
+.name-cell a{color:inherit;text-decoration:none}
+.name-cell a:hover{text-decoration:underline;color:#58a6ff}
+.positive{color:#f85149}   /* 乖離率為正 = 超過月線 = 偏高（紅） */
+.negative{color:#3fb950}   /* 乖離率為負 = 低於月線 = 偏低（綠） */
+.neutral{color:#8b949e}
+.no-data{color:#484f58;font-style:italic}
+
+.dev-bar{display:flex;align-items:center;gap:8px}
+.bar-track{width:80px;height:6px;background:#21262d;border-radius:3px;overflow:hidden;flex-shrink:0}
+.bar-pos{height:100%;background:#f85149;border-radius:3px}
+.bar-neg{height:100%;background:#3fb950;border-radius:3px;margin-left:auto}
+
+.reason-cell{max-width:200px;overflow:hidden;text-overflow:ellipsis;color:#8b949e;font-size:12px}
+.interval-badge{display:inline-block;padding:1px 6px;border-radius:4px;font-size:11px;background:#21262d;color:#8b949e}
+.remaining-badge{display:inline-block;padding:1px 6px;border-radius:4px;font-size:11px;font-weight:700}
+.rem-exit{background:#1a4731;color:#3fb950}
+.rem-soon{background:#3a2d00;color:#d29922}
+.rem-long{background:#1c2e4a;color:#58a6ff}
+.market-m{color:#f85149;font-weight:700}
+.market-k{color:#58a6ff;font-weight:700}
+
+.search-box{padding:8px 12px;background:#0d1117;border:1px solid #21262d;border-radius:6px;color:#e6edf3;font-size:13px;width:220px;outline:none}
+.search-box:focus{border-color:#58a6ff}
+.filter-row{display:flex;gap:8px;flex-wrap:wrap;padding:12px 16px;border-bottom:1px solid #21262d;align-items:center}
+.filter-btn{padding:4px 12px;border-radius:6px;border:1px solid #21262d;background:#0d1117;color:#8b949e;font-size:12px;cursor:pointer}
+.filter-btn.active{background:#1c2e4a;color:#58a6ff;border-color:#58a6ff}
+
+footer{text-align:center;color:#484f58;font-size:11px;padding:24px;margin-top:24px;border-top:1px solid #21262d}
+</style>
+</head>
+<body>
+
+<nav>
+  <h1>⚫ 處置中分盤交易</h1>
+  <span class="badge badge-blue">資料來源：chengwaye.com</span>
+  <span class="badge badge-yellow">月線乖離率</span>
+  <span class="update">基準日 2026-04-30 ｜ 共 85 檔 ｜ 產生時間 2026-04-30 11:37:28</span>
+</nav>
+
+<div class="container">
+
+  <!-- KPI -->
+  <div class="summary">
+    <div class="kpi">
+      <div class="num">85</div>
+      <div class="lbl">分盤交易總數</div>
+    </div>
+    <div class="kpi">
+      <div class="num" style="color:#3fb950">8</div>
+      <div class="lbl">明日出關</div>
+    </div>
+    <div class="kpi">
+      <div class="num" style="color:#f85149">75</div>
+      <div class="lbl">乖離率 &gt;+5%</div>
+    </div>
+    <div class="kpi">
+      <div class="num" style="color:#3fb950">2</div>
+      <div class="lbl">乖離率 &lt;-5%</div>
+    </div>
+    <div class="kpi">
+      <div class="num" style="color:#8b949e">0</div>
+      <div class="lbl">無法取得資料</div>
+    </div>
+  </div>
+
+  <!-- 主表格 -->
+  <div class="card">
+    <div class="card-header">
+      <h2>個股清單</h2>
+      <input class="search-box" id="searchBox" type="text" placeholder="搜尋代號或名稱...">
+    </div>
+    <div class="filter-row">
+      <span style="font-size:12px;color:#8b949e">篩選：</span>
+      <button class="filter-btn active" data-filter="all">全部</button>
+      <button class="filter-btn" data-filter="exit">明日出關</button>
+      <button class="filter-btn" data-filter="pos">乖離率 &gt;0%</button>
+      <button class="filter-btn" data-filter="neg">乖離率 &lt;0%</button>
+      <button class="filter-btn" data-filter="market">上市</button>
+      <button class="filter-btn" data-filter="otc">上櫃</button>
+    </div>
+    <div style="overflow-x:auto">
+    <table id="mainTable">
+      <thead>
+        <tr>
+          <th data-col="0">所</th>
+          <th data-col="1">代號</th>
+          <th data-col="2">名稱</th>
+          <th data-col="3">撮合</th>
+          <th data-col="4">開始</th>
+          <th data-col="5">結束</th>
+          <th data-col="6">出關日</th>
+          <th data-col="7" class="sort-asc">剩餘</th>
+          <th data-col="8" class="num-cell">現價</th>
+          <th data-col="9" class="num-cell">MA10</th>
+          <th data-col="10" class="num-cell">十日線乖離率</th>
+          <th data-col="11" class="num-cell">MA20</th>
+          <th data-col="12" class="num-cell">月線乖離率</th>
+          <th>處置原因</th>
+        </tr>
+      </thead>
+      <tbody id="tableBody">
+        <tr data-code="3167" data-name="大量" data-market="市"
+            data-rem="出關" data-dev="31.85" data-dev10="17.92">
+          <td class="market-m">市</td>
+          <td class="code-cell"><a href="https://goodinfo.tw/tw/StockInfo.asp?STOCK_ID=3167" target="_blank" rel="noopener">3167</a></td>
+          <td class="name-cell"><a href="https://tw.stock.yahoo.com/quote/3167" target="_blank" rel="noopener">大量</a></td>
+          <td><span class="interval-badge">20分</span></td>
+          <td>04-16</td>
+          <td>04-29</td>
+          <td>04-30</td>
+          <td><span class="remaining-badge rem-exit">出關</span></td>
+          <td class="num-cell" data-val="814.00">814.00</td>
+          <td class="num-cell" data-val="690.30">690.30</td>
+          <td class="num-cell"><div class="dev-bar"><div class="bar-track"><div class="bar-pos" style="width:90%"></div></div><span class="positive">+17.92%</span></div></td>
+          <td class="num-cell" data-val="617.35">617.35</td>
+          <td class="num-cell"><div class="dev-bar"><div class="bar-track"><div class="bar-pos" style="width:100%"></div></div><span class="positive">+31.85%</span></div></td>
+          <td class="reason-cell" title="連續3日第1款｜第2次處置">連續3日第1款｜第2次處置</td>
+        </tr>
+        <tr data-code="3532" data-name="台勝科" data-market="市"
+            data-rem="出關" data-dev="7.99" data-dev10="-0.47">
+          <td class="market-m">市</td>
+          <td class="code-cell"><a href="https://goodinfo.tw/tw/StockInfo.asp?STOCK_ID=3532" target="_blank" rel="noopener">3532</a></td>
+          <td class="name-cell"><a href="https://tw.stock.yahoo.com/quote/3532" target="_blank" rel="noopener">台勝科</a></td>
+          <td><span class="interval-badge">5分</span></td>
+          <td>04-16</td>
+          <td>04-29</td>
+          <td>04-30</td>
+          <td><span class="remaining-badge rem-exit">出關</span></td>
+          <td class="num-cell" data-val="181.50">181.50</td>
+          <td class="num-cell" data-val="182.35">182.35</td>
+          <td class="num-cell"><div class="dev-bar"><div class="bar-track"><div class="bar-neg" style="width:2%"></div></div><span class="negative">-0.47%</span></div></td>
+          <td class="num-cell" data-val="168.07">168.07</td>
+          <td class="num-cell"><div class="dev-bar"><div class="bar-track"><div class="bar-pos" style="width:40%"></div></div><span class="positive">+7.99%</span></div></td>
+          <td class="reason-cell" title="連續3日第1款｜第1次處置">連續3日第1款｜第1次處置</td>
+        </tr>
+        <tr data-code="4569" data-name="六方科-KY" data-market="市"
+            data-rem="出關" data-dev="9.93" data-dev10="-0.76">
+          <td class="market-m">市</td>
+          <td class="code-cell"><a href="https://goodinfo.tw/tw/StockInfo.asp?STOCK_ID=4569" target="_blank" rel="noopener">4569</a></td>
+          <td class="name-cell"><a href="https://tw.stock.yahoo.com/quote/4569" target="_blank" rel="noopener">六方科-KY</a></td>
+          <td><span class="interval-badge">5分</span></td>
+          <td>04-16</td>
+          <td>04-29</td>
+          <td>04-30</td>
+          <td><span class="remaining-badge rem-exit">出關</span></td>
+          <td class="num-cell" data-val="188.50">188.50</td>
+          <td class="num-cell" data-val="189.95">189.95</td>
+          <td class="num-cell"><div class="dev-bar"><div class="bar-track"><div class="bar-neg" style="width:4%"></div></div><span class="negative">-0.76%</span></div></td>
+          <td class="num-cell" data-val="171.47">171.47</td>
+          <td class="num-cell"><div class="dev-bar"><div class="bar-track"><div class="bar-pos" style="width:50%"></div></div><span class="positive">+9.93%</span></div></td>
+          <td class="reason-cell" title="連續3日第1款｜第1次處置">連續3日第1款｜第1次處置</td>
+        </tr>
+        <tr data-code="4576" data-name="大銀微系統" data-market="市"
+            data-rem="出關" data-dev="26.73" data-dev10="15.03">
+          <td class="market-m">市</td>
+          <td class="code-cell"><a href="https://goodinfo.tw/tw/StockInfo.asp?STOCK_ID=4576" target="_blank" rel="noopener">4576</a></td>
+          <td class="name-cell"><a href="https://tw.stock.yahoo.com/quote/4576" target="_blank" rel="noopener">大銀微系統</a></td>
+          <td><span class="interval-badge">5分</span></td>
+          <td>04-16</td>
+          <td>04-29</td>
+          <td>04-30</td>
+          <td><span class="remaining-badge rem-exit">出關</span></td>
+          <td class="num-cell" data-val="222.00">222.00</td>
+          <td class="num-cell" data-val="193.00">193.00</td>
+          <td class="num-cell"><div class="dev-bar"><div class="bar-track"><div class="bar-pos" style="width:75%"></div></div><span class="positive">+15.03%</span></div></td>
+          <td class="num-cell" data-val="175.18">175.18</td>
+          <td class="num-cell"><div class="dev-bar"><div class="bar-track"><div class="bar-pos" style="width:100%"></div></div><span class="positive">+26.73%</span></div></td>
+          <td class="reason-cell" title="連續3日第1款｜第1次處置">連續3日第1款｜第1次處置</td>
+        </tr>
+        <tr data-code="4949" data-name="有成精密" data-market="市"
+            data-rem="出關" data-dev="34.07" data-dev10="23.93">
+          <td class="market-m">市</td>
+          <td class="code-cell"><a href="https://goodinfo.tw/tw/StockInfo.asp?STOCK_ID=4949" target="_blank" rel="noopener">4949</a></td>
+          <td class="name-cell"><a href="https://tw.stock.yahoo.com/quote/4949" target="_blank" rel="noopener">有成精密</a></td>
+          <td><span class="interval-badge">5分</span></td>
+          <td>04-16</td>
+          <td>04-29</td>
+          <td>04-30</td>
+          <td><span class="remaining-badge rem-exit">出關</span></td>
+          <td class="num-cell" data-val="112.50">112.50</td>
+          <td class="num-cell" data-val="90.78">90.78</td>
+          <td class="num-cell"><div class="dev-bar"><div class="bar-track"><div class="bar-pos" style="width:100%"></div></div><span class="positive">+23.93%</span></div></td>
+          <td class="num-cell" data-val="83.91">83.91</td>
+          <td class="num-cell"><div class="dev-bar"><div class="bar-track"><div class="bar-pos" style="width:100%"></div></div><span class="positive">+34.07%</span></div></td>
+          <td class="reason-cell" title="連續3日第1款｜第1次處置">連續3日第1款｜第1次處置</td>
+        </tr>
+        <tr data-code="6806" data-name="森崴能源" data-market="市"
+            data-rem="出關" data-dev="-9.13" data-dev10="-3.05">
+          <td class="market-m">市</td>
+          <td class="code-cell"><a href="https://goodinfo.tw/tw/StockInfo.asp?STOCK_ID=6806" target="_blank" rel="noopener">6806</a></td>
+          <td class="name-cell"><a href="https://tw.stock.yahoo.com/quote/6806" target="_blank" rel="noopener">森崴能源</a></td>
+          <td><span class="interval-badge">25分</span></td>
+          <td>04-16</td>
+          <td>04-29</td>
+          <td>04-30</td>
+          <td><span class="remaining-badge rem-exit">出關</span></td>
+          <td class="num-cell" data-val="23.80">23.80</td>
+          <td class="num-cell" data-val="24.55">24.55</td>
+          <td class="num-cell"><div class="dev-bar"><div class="bar-track"><div class="bar-neg" style="width:15%"></div></div><span class="negative">-3.05%</span></div></td>
+          <td class="num-cell" data-val="26.19">26.19</td>
+          <td class="num-cell"><div class="dev-bar"><div class="bar-track"><div class="bar-neg" style="width:46%"></div></div><span class="negative">-9.13%</span></div></td>
+          <td class="reason-cell" title="連續3日第1款｜變更交易方法">連續3日第1款｜變更交易方法</td>
+        </tr>
+        <tr data-code="1785" data-name="光洋科" data-market="櫃"
+            data-rem="出關" data-dev="31.35" data-dev10="12.94">
+          <td class="market-k">櫃</td>
+          <td class="code-cell"><a href="https://goodinfo.tw/tw/StockInfo.asp?STOCK_ID=1785" target="_blank" rel="noopener">1785</a></td>
+          <td class="name-cell"><a href="https://tw.stock.yahoo.com/quote/1785" target="_blank" rel="noopener">光洋科</a></td>
+          <td><span class="interval-badge">5分</span></td>
+          <td>04-16</td>
+          <td>04-29</td>
+          <td>04-30</td>
+          <td><span class="remaining-badge rem-exit">出關</span></td>
+          <td class="num-cell" data-val="178.00">178.00</td>
+          <td class="num-cell" data-val="157.60">157.60</td>
+          <td class="num-cell"><div class="dev-bar"><div class="bar-track"><div class="bar-pos" style="width:65%"></div></div><span class="positive">+12.94%</span></div></td>
+          <td class="num-cell" data-val="135.52">135.52</td>
+          <td class="num-cell"><div class="dev-bar"><div class="bar-track"><div class="bar-pos" style="width:100%"></div></div><span class="positive">+31.35%</span></div></td>
+          <td class="reason-cell" title="連續3日第一款">連續3日第一款</td>
+        </tr>
+        <tr data-code="4577" data-name="達航科技" data-market="櫃"
+            data-rem="出關" data-dev="20.57" data-dev10="5.55">
+          <td class="market-k">櫃</td>
+          <td class="code-cell"><a href="https://goodinfo.tw/tw/StockInfo.asp?STOCK_ID=4577" target="_blank" rel="noopener">4577</a></td>
+          <td class="name-cell"><a href="https://tw.stock.yahoo.com/quote/4577" target="_blank" rel="noopener">達航科技</a></td>
+          <td><span class="interval-badge">5分</span></td>
+          <td>04-16</td>
+          <td>04-29</td>
+          <td>04-30</td>
+          <td><span class="remaining-badge rem-exit">出關</span></td>
+          <td class="num-cell" data-val="174.00">174.00</td>
+          <td class="num-cell" data-val="164.85">164.85</td>
+          <td class="num-cell"><div class="dev-bar"><div class="bar-track"><div class="bar-pos" style="width:28%"></div></div><span class="positive">+5.55%</span></div></td>
+          <td class="num-cell" data-val="144.32">144.32</td>
+          <td class="num-cell"><div class="dev-bar"><div class="bar-track"><div class="bar-pos" style="width:100%"></div></div><span class="positive">+20.57%</span></div></td>
+          <td class="reason-cell" title="連續3日第一款">連續3日第一款</td>
+        </tr>
+        <tr data-code="3443" data-name="創意" data-market="市"
+            data-rem="1天" data-dev="31.49" data-dev10="10.85">
+          <td class="market-m">市</td>
+          <td class="code-cell"><a href="https://goodinfo.tw/tw/StockInfo.asp?STOCK_ID=3443" target="_blank" rel="noopener">3443</a></td>
+          <td class="name-cell"><a href="https://tw.stock.yahoo.com/quote/3443" target="_blank" rel="noopener">創意</a></td>
+          <td><span class="interval-badge">5分</span></td>
+          <td>04-17</td>
+          <td>04-30</td>
+          <td>05-04</td>
+          <td><span class="remaining-badge rem-soon">1天</span></td>
+          <td class="num-cell" data-val="4190.00">4190.00</td>
+          <td class="num-cell" data-val="3780.00">3780.00</td>
+          <td class="num-cell"><div class="dev-bar"><div class="bar-track"><div class="bar-pos" style="width:54%"></div></div><span class="positive">+10.85%</span></div></td>
+          <td class="num-cell" data-val="3186.50">3186.50</td>
+          <td class="num-cell"><div class="dev-bar"><div class="bar-track"><div class="bar-pos" style="width:100%"></div></div><span class="positive">+31.49%</span></div></td>
+          <td class="reason-cell" title="連續3日第1款｜第1次處置">連續3日第1款｜第1次處置</td>
+        </tr>
+        <tr data-code="3593" data-name="力銘" data-market="市"
+            data-rem="1天" data-dev="16.46" data-dev10="2.78">
+          <td class="market-m">市</td>
+          <td class="code-cell"><a href="https://goodinfo.tw/tw/StockInfo.asp?STOCK_ID=3593" target="_blank" rel="noopener">3593</a></td>
+          <td class="name-cell"><a href="https://tw.stock.yahoo.com/quote/3593" target="_blank" rel="noopener">力銘</a></td>
+          <td><span class="interval-badge">10分</span></td>
+          <td>04-17</td>
+          <td>04-30</td>
+          <td>05-04</td>
+          <td><span class="remaining-badge rem-soon">1天</span></td>
+          <td class="num-cell" data-val="19.95">19.95</td>
+          <td class="num-cell" data-val="19.41">19.41</td>
+          <td class="num-cell"><div class="dev-bar"><div class="bar-track"><div class="bar-pos" style="width:14%"></div></div><span class="positive">+2.78%</span></div></td>
+          <td class="num-cell" data-val="17.13">17.13</td>
+          <td class="num-cell"><div class="dev-bar"><div class="bar-track"><div class="bar-pos" style="width:82%"></div></div><span class="positive">+16.46%</span></div></td>
+          <td class="reason-cell" title="連續3日第1款｜變更交易方法">連續3日第1款｜變更交易方法</td>
+        </tr>
+        <tr data-code="4989" data-name="榮科" data-market="市"
+            data-rem="1天" data-dev="24.05" data-dev10="5.41">
+          <td class="market-m">市</td>
+          <td class="code-cell"><a href="https://goodinfo.tw/tw/StockInfo.asp?STOCK_ID=4989" target="_blank" rel="noopener">4989</a></td>
+          <td class="name-cell"><a href="https://tw.stock.yahoo.com/quote/4989" target="_blank" rel="noopener">榮科</a></td>
+          <td><span class="interval-badge">5分</span></td>
+          <td>04-17</td>
+          <td>04-30</td>
+          <td>05-04</td>
+          <td><span class="remaining-badge rem-soon">1天</span></td>
+          <td class="num-cell" data-val="113.00">113.00</td>
+          <td class="num-cell" data-val="107.20">107.20</td>
+          <td class="num-cell"><div class="dev-bar"><div class="bar-track"><div class="bar-pos" style="width:27%"></div></div><span class="positive">+5.41%</span></div></td>
+          <td class="num-cell" data-val="91.09">91.09</td>
+          <td class="num-cell"><div class="dev-bar"><div class="bar-track"><div class="bar-pos" style="width:100%"></div></div><span class="positive">+24.05%</span></div></td>
+          <td class="reason-cell" title="連續3日第1款｜第1次處置">連續3日第1款｜第1次處置</td>
+        </tr>
+        <tr data-code="6949" data-name="沛爾生醫-創" data-market="市"
+            data-rem="1天" data-dev="8.21" data-dev10="-2.52">
+          <td class="market-m">市</td>
+          <td class="code-cell"><a href="https://goodinfo.tw/tw/StockInfo.asp?STOCK_ID=6949" target="_blank" rel="noopener">6949</a></td>
+          <td class="name-cell"><a href="https://tw.stock.yahoo.com/quote/6949" target="_blank" rel="noopener">沛爾生醫-創</a></td>
+          <td><span class="interval-badge">5分</span></td>
+          <td>04-17</td>
+          <td>04-30</td>
+          <td>05-04</td>
+          <td><span class="remaining-badge rem-soon">1天</span></td>
+          <td class="num-cell" data-val="782.00">782.00</td>
+          <td class="num-cell" data-val="802.20">802.20</td>
+          <td class="num-cell"><div class="dev-bar"><div class="bar-track"><div class="bar-neg" style="width:13%"></div></div><span class="negative">-2.52%</span></div></td>
+          <td class="num-cell" data-val="722.65">722.65</td>
+          <td class="num-cell"><div class="dev-bar"><div class="bar-track"><div class="bar-pos" style="width:41%"></div></div><span class="positive">+8.21%</span></div></td>
+          <td class="reason-cell" title="連續3日第1款｜第1次處置">連續3日第1款｜第1次處置</td>
+        </tr>
+        <tr data-code="3289" data-name="宜特" data-market="櫃"
+            data-rem="1天" data-dev="16.53" data-dev10="5.32">
+          <td class="market-k">櫃</td>
+          <td class="code-cell"><a href="https://goodinfo.tw/tw/StockInfo.asp?STOCK_ID=3289" target="_blank" rel="noopener">3289</a></td>
+          <td class="name-cell"><a href="https://tw.stock.yahoo.com/quote/3289" target="_blank" rel="noopener">宜特</a></td>
+          <td><span class="interval-badge">5分</span></td>
+          <td>04-17</td>
+          <td>04-30</td>
+          <td>05-04</td>
+          <td><span class="remaining-badge rem-soon">1天</span></td>
+          <td class="num-cell" data-val="203.00">203.00</td>
+          <td class="num-cell" data-val="192.75">192.75</td>
+          <td class="num-cell"><div class="dev-bar"><div class="bar-track"><div class="bar-pos" style="width:27%"></div></div><span class="positive">+5.32%</span></div></td>
+          <td class="num-cell" data-val="174.20">174.20</td>
+          <td class="num-cell"><div class="dev-bar"><div class="bar-track"><div class="bar-pos" style="width:83%"></div></div><span class="positive">+16.53%</span></div></td>
+          <td class="reason-cell" title="連續3日第一款">連續3日第一款</td>
+        </tr>
+        <tr data-code="6274" data-name="台燿" data-market="櫃"
+            data-rem="1天" data-dev="14.29" data-dev10="2.94">
+          <td class="market-k">櫃</td>
+          <td class="code-cell"><a href="https://goodinfo.tw/tw/StockInfo.asp?STOCK_ID=6274" target="_blank" rel="noopener">6274</a></td>
+          <td class="name-cell"><a href="https://tw.stock.yahoo.com/quote/6274" target="_blank" rel="noopener">台燿</a></td>
+          <td><span class="interval-badge">5分</span></td>
+          <td>04-17</td>
+          <td>04-30</td>
+          <td>05-04</td>
+          <td><span class="remaining-badge rem-soon">1天</span></td>
+          <td class="num-cell" data-val="1005.00">1005.00</td>
+          <td class="num-cell" data-val="976.30">976.30</td>
+          <td class="num-cell"><div class="dev-bar"><div class="bar-track"><div class="bar-pos" style="width:15%"></div></div><span class="positive">+2.94%</span></div></td>
+          <td class="num-cell" data-val="879.35">879.35</td>
+          <td class="num-cell"><div class="dev-bar"><div class="bar-track"><div class="bar-pos" style="width:71%"></div></div><span class="positive">+14.29%</span></div></td>
+          <td class="reason-cell" title="連續3日第一款">連續3日第一款</td>
+        </tr>
+        <tr data-code="7556" data-name="意德士" data-market="櫃"
+            data-rem="1天" data-dev="20.09" data-dev10="1.90">
+          <td class="market-k">櫃</td>
+          <td class="code-cell"><a href="https://goodinfo.tw/tw/StockInfo.asp?STOCK_ID=7556" target="_blank" rel="noopener">7556</a></td>
+          <td class="name-cell"><a href="https://tw.stock.yahoo.com/quote/7556" target="_blank" rel="noopener">意德士</a></td>
+          <td><span class="interval-badge">5分</span></td>
+          <td>04-17</td>
+          <td>04-30</td>
+          <td>05-04</td>
+          <td><span class="remaining-badge rem-soon">1天</span></td>
+          <td class="num-cell" data-val="303.00">303.00</td>
+          <td class="num-cell" data-val="297.35">297.35</td>
+          <td class="num-cell"><div class="dev-bar"><div class="bar-track"><div class="bar-pos" style="width:10%"></div></div><span class="positive">+1.90%</span></div></td>
+          <td class="num-cell" data-val="252.32">252.32</td>
+          <td class="num-cell"><div class="dev-bar"><div class="bar-track"><div class="bar-pos" style="width:100%"></div></div><span class="positive">+20.09%</span></div></td>
+          <td class="reason-cell" title="連續3日第一款">連續3日第一款</td>
+        </tr>
+        <tr data-code="2923" data-name="鼎固-KY" data-market="市"
+            data-rem="2天" data-dev="-2.49" data-dev10="-13.45">
+          <td class="market-m">市</td>
+          <td class="code-cell"><a href="https://goodinfo.tw/tw/StockInfo.asp?STOCK_ID=2923" target="_blank" rel="noopener">2923</a></td>
+          <td class="name-cell"><a href="https://tw.stock.yahoo.com/quote/2923" target="_blank" rel="noopener">鼎固-KY</a></td>
+          <td><span class="interval-badge">5分</span></td>
+          <td>04-20</td>
+          <td>05-04</td>
+          <td>05-05</td>
+          <td><span class="remaining-badge rem-soon">2天</span></td>
+          <td class="num-cell" data-val="21.95">21.95</td>
+          <td class="num-cell" data-val="25.36">25.36</td>
+          <td class="num-cell"><div class="dev-bar"><div class="bar-track"><div class="bar-neg" style="width:67%"></div></div><span class="negative">-13.45%</span></div></td>
+          <td class="num-cell" data-val="22.51">22.51</td>
+          <td class="num-cell"><div class="dev-bar"><div class="bar-track"><div class="bar-neg" style="width:12%"></div></div><span class="negative">-2.49%</span></div></td>
+          <td class="reason-cell" title="連續3日第1款｜第1次處置">連續3日第1款｜第1次處置</td>
+        </tr>
+        <tr data-code="3714" data-name="富采" data-market="市"
+            data-rem="2天" data-dev="14.13" data-dev10="0.32">
+          <td class="market-m">市</td>
+          <td class="code-cell"><a href="https://goodinfo.tw/tw/StockInfo.asp?STOCK_ID=3714" target="_blank" rel="noopener">3714</a></td>
+          <td class="name-cell"><a href="https://tw.stock.yahoo.com/quote/3714" target="_blank" rel="noopener">富采</a></td>
+          <td><span class="interval-badge">5分</span></td>
+          <td>04-20</td>
+          <td>05-04</td>
+          <td>05-05</td>
+          <td><span class="remaining-badge rem-soon">2天</span></td>
+          <td class="num-cell" data-val="72.70">72.70</td>
+          <td class="num-cell" data-val="72.47">72.47</td>
+          <td class="num-cell"><div class="dev-bar"><div class="bar-track"><div class="bar-pos" style="width:2%"></div></div><span class="positive">+0.32%</span></div></td>
+          <td class="num-cell" data-val="63.70">63.70</td>
+          <td class="num-cell"><div class="dev-bar"><div class="bar-track"><div class="bar-pos" style="width:71%"></div></div><span class="positive">+14.13%</span></div></td>
+          <td class="reason-cell" title="連續3日第1款｜第1次處置">連續3日第1款｜第1次處置</td>
+        </tr>
+        <tr data-code="6224" data-name="聚鼎" data-market="市"
+            data-rem="2天" data-dev="37.27" data-dev10="18.63">
+          <td class="market-m">市</td>
+          <td class="code-cell"><a href="https://goodinfo.tw/tw/StockInfo.asp?STOCK_ID=6224" target="_blank" rel="noopener">6224</a></td>
+          <td class="name-cell"><a href="https://tw.stock.yahoo.com/quote/6224" target="_blank" rel="noopener">聚鼎</a></td>
+          <td><span class="interval-badge">5分</span></td>
+          <td>04-20</td>
+          <td>05-04</td>
+          <td>05-05</td>
+          <td><span class="remaining-badge rem-soon">2天</span></td>
+          <td class="num-cell" data-val="71.90">71.90</td>
+          <td class="num-cell" data-val="60.61">60.61</td>
+          <td class="num-cell"><div class="dev-bar"><div class="bar-track"><div class="bar-pos" style="width:93%"></div></div><span class="positive">+18.63%</span></div></td>
+          <td class="num-cell" data-val="52.38">52.38</td>
+          <td class="num-cell"><div class="dev-bar"><div class="bar-track"><div class="bar-pos" style="width:100%"></div></div><span class="positive">+37.27%</span></div></td>
+          <td class="reason-cell" title="連續3日第1款｜第1次處置">連續3日第1款｜第1次處置</td>
+        </tr>
+        <tr data-code="6278" data-name="台表科" data-market="市"
+            data-rem="2天" data-dev="37.92" data-dev10="16.05">
+          <td class="market-m">市</td>
+          <td class="code-cell"><a href="https://goodinfo.tw/tw/StockInfo.asp?STOCK_ID=6278" target="_blank" rel="noopener">6278</a></td>
+          <td class="name-cell"><a href="https://tw.stock.yahoo.com/quote/6278" target="_blank" rel="noopener">台表科</a></td>
+          <td><span class="interval-badge">5分</span></td>
+          <td>04-20</td>
+          <td>05-04</td>
+          <td>05-05</td>
+          <td><span class="remaining-badge rem-soon">2天</span></td>
+          <td class="num-cell" data-val="177.50">177.50</td>
+          <td class="num-cell" data-val="152.95">152.95</td>
+          <td class="num-cell"><div class="dev-bar"><div class="bar-track"><div class="bar-pos" style="width:80%"></div></div><span class="positive">+16.05%</span></div></td>
+          <td class="num-cell" data-val="128.70">128.70</td>
+          <td class="num-cell"><div class="dev-bar"><div class="bar-track"><div class="bar-pos" style="width:100%"></div></div><span class="positive">+37.92%</span></div></td>
+          <td class="reason-cell" title="連續3日第1款｜第1次處置">連續3日第1款｜第1次處置</td>
+        </tr>
+        <tr data-code="6451" data-name="訊芯-KY" data-market="市"
+            data-rem="2天" data-dev="-4.42" data-dev10="-11.79">
+          <td class="market-m">市</td>
+          <td class="code-cell"><a href="https://goodinfo.tw/tw/StockInfo.asp?STOCK_ID=6451" target="_blank" rel="noopener">6451</a></td>
+          <td class="name-cell"><a href="https://tw.stock.yahoo.com/quote/6451" target="_blank" rel="noopener">訊芯-KY</a></td>
+          <td><span class="interval-badge">20分</span></td>
+          <td>04-20</td>
+          <td>05-04</td>
+          <td>05-05</td>
+          <td><span class="remaining-badge rem-soon">2天</span></td>
+          <td class="num-cell" data-val="397.50">397.50</td>
+          <td class="num-cell" data-val="450.65">450.65</td>
+          <td class="num-cell"><div class="dev-bar"><div class="bar-track"><div class="bar-neg" style="width:59%"></div></div><span class="negative">-11.79%</span></div></td>
+          <td class="num-cell" data-val="415.88">415.88</td>
+          <td class="num-cell"><div class="dev-bar"><div class="bar-track"><div class="bar-neg" style="width:22%"></div></div><span class="negative">-4.42%</span></div></td>
+          <td class="reason-cell" title="連續3日第1款｜第2次處置">連續3日第1款｜第2次處置</td>
+        </tr>
+        <tr data-code="7610" data-name="聯友金屬-創" data-market="市"
+            data-rem="2天" data-dev="16.00" data-dev10="1.38">
+          <td class="market-m">市</td>
+          <td class="code-cell"><a href="https://goodinfo.tw/tw/StockInfo.asp?STOCK_ID=7610" target="_blank" rel="noopener">7610</a></td>
+          <td class="name-cell"><a href="https://tw.stock.yahoo.com/quote/7610" target="_blank" rel="noopener">聯友金屬-創</a></td>
+          <td><span class="interval-badge">20分</span></td>
+          <td>04-20</td>
+          <td>05-04</td>
+          <td>05-05</td>
+          <td><span class="remaining-badge rem-soon">2天</span></td>
+          <td class="num-cell" data-val="638.00">638.00</td>
+          <td class="num-cell" data-val="629.30">629.30</td>
+          <td class="num-cell"><div class="dev-bar"><div class="bar-track"><div class="bar-pos" style="width:7%"></div></div><span class="positive">+1.38%</span></div></td>
+          <td class="num-cell" data-val="550.00">550.00</td>
+          <td class="num-cell"><div class="dev-bar"><div class="bar-track"><div class="bar-pos" style="width:80%"></div></div><span class="positive">+16.00%</span></div></td>
+          <td class="reason-cell" title="連續3日第1款｜第2次處置">連續3日第1款｜第2次處置</td>
+        </tr>
+        <tr data-code="3467" data-name="台灣精材" data-market="櫃"
+            data-rem="2天" data-dev="17.31" data-dev10="3.30">
+          <td class="market-k">櫃</td>
+          <td class="code-cell"><a href="https://goodinfo.tw/tw/StockInfo.asp?STOCK_ID=3467" target="_blank" rel="noopener">3467</a></td>
+          <td class="name-cell"><a href="https://tw.stock.yahoo.com/quote/3467" target="_blank" rel="noopener">台灣精材</a></td>
+          <td><span class="interval-badge">5分</span></td>
+          <td>04-20</td>
+          <td>05-04</td>
+          <td>05-05</td>
+          <td><span class="remaining-badge rem-soon">2天</span></td>
+          <td class="num-cell" data-val="62.00">62.00</td>
+          <td class="num-cell" data-val="60.02">60.02</td>
+          <td class="num-cell"><div class="dev-bar"><div class="bar-track"><div class="bar-pos" style="width:16%"></div></div><span class="positive">+3.30%</span></div></td>
+          <td class="num-cell" data-val="52.85">52.85</td>
+          <td class="num-cell"><div class="dev-bar"><div class="bar-track"><div class="bar-pos" style="width:87%"></div></div><span class="positive">+17.31%</span></div></td>
+          <td class="reason-cell" title="連續3日第一款">連續3日第一款</td>
+        </tr>
+        <tr data-code="5228" data-name="鈺鎧" data-market="櫃"
+            data-rem="2天" data-dev="10.49" data-dev10="-0.71">
+          <td class="market-k">櫃</td>
+          <td class="code-cell"><a href="https://goodinfo.tw/tw/StockInfo.asp?STOCK_ID=5228" target="_blank" rel="noopener">5228</a></td>
+          <td class="name-cell"><a href="https://tw.stock.yahoo.com/quote/5228" target="_blank" rel="noopener">鈺鎧</a></td>
+          <td><span class="interval-badge">5分</span></td>
+          <td>04-20</td>
+          <td>05-04</td>
+          <td>05-05</td>
+          <td><span class="remaining-badge rem-soon">2天</span></td>
+          <td class="num-cell" data-val="33.60">33.60</td>
+          <td class="num-cell" data-val="33.84">33.84</td>
+          <td class="num-cell"><div class="dev-bar"><div class="bar-track"><div class="bar-neg" style="width:4%"></div></div><span class="negative">-0.71%</span></div></td>
+          <td class="num-cell" data-val="30.41">30.41</td>
+          <td class="num-cell"><div class="dev-bar"><div class="bar-track"><div class="bar-pos" style="width:52%"></div></div><span class="positive">+10.49%</span></div></td>
+          <td class="reason-cell" title="連續3日第一款">連續3日第一款</td>
+        </tr>
+        <tr data-code="6419" data-name="京晨科" data-market="櫃"
+            data-rem="2天" data-dev="20.44" data-dev10="5.75">
+          <td class="market-k">櫃</td>
+          <td class="code-cell"><a href="https://goodinfo.tw/tw/StockInfo.asp?STOCK_ID=6419" target="_blank" rel="noopener">6419</a></td>
+          <td class="name-cell"><a href="https://tw.stock.yahoo.com/quote/6419" target="_blank" rel="noopener">京晨科</a></td>
+          <td><span class="interval-badge">5分</span></td>
+          <td>04-20</td>
+          <td>05-04</td>
+          <td>05-05</td>
+          <td><span class="remaining-badge rem-soon">2天</span></td>
+          <td class="num-cell" data-val="148.00">148.00</td>
+          <td class="num-cell" data-val="139.95">139.95</td>
+          <td class="num-cell"><div class="dev-bar"><div class="bar-track"><div class="bar-pos" style="width:29%"></div></div><span class="positive">+5.75%</span></div></td>
+          <td class="num-cell" data-val="122.88">122.88</td>
+          <td class="num-cell"><div class="dev-bar"><div class="bar-track"><div class="bar-pos" style="width:100%"></div></div><span class="positive">+20.44%</span></div></td>
+          <td class="reason-cell" title="連續3日第一款">連續3日第一款</td>
+        </tr>
+        <tr data-code="8043" data-name="蜜望實" data-market="櫃"
+            data-rem="2天" data-dev="6.13" data-dev10="-1.63">
+          <td class="market-k">櫃</td>
+          <td class="code-cell"><a href="https://goodinfo.tw/tw/StockInfo.asp?STOCK_ID=8043" target="_blank" rel="noopener">8043</a></td>
+          <td class="name-cell"><a href="https://tw.stock.yahoo.com/quote/8043" target="_blank" rel="noopener">蜜望實</a></td>
+          <td><span class="interval-badge">5分</span></td>
+          <td>04-20</td>
+          <td>05-04</td>
+          <td>05-05</td>
+          <td><span class="remaining-badge rem-soon">2天</span></td>
+          <td class="num-cell" data-val="86.50">86.50</td>
+          <td class="num-cell" data-val="87.93">87.93</td>
+          <td class="num-cell"><div class="dev-bar"><div class="bar-track"><div class="bar-neg" style="width:8%"></div></div><span class="negative">-1.63%</span></div></td>
+          <td class="num-cell" data-val="81.50">81.50</td>
+          <td class="num-cell"><div class="dev-bar"><div class="bar-track"><div class="bar-pos" style="width:31%"></div></div><span class="positive">+6.13%</span></div></td>
+          <td class="reason-cell" title="連續3日第一款">連續3日第一款</td>
+        </tr>
+        <tr data-code="3042" data-name="晶技" data-market="市"
+            data-rem="3天" data-dev="20.36" data-dev10="2.86">
+          <td class="market-m">市</td>
+          <td class="code-cell"><a href="https://goodinfo.tw/tw/StockInfo.asp?STOCK_ID=3042" target="_blank" rel="noopener">3042</a></td>
+          <td class="name-cell"><a href="https://tw.stock.yahoo.com/quote/3042" target="_blank" rel="noopener">晶技</a></td>
+          <td><span class="interval-badge">20分</span></td>
+          <td>04-21</td>
+          <td>05-05</td>
+          <td>05-06</td>
+          <td><span class="remaining-badge rem-soon">3天</span></td>
+          <td class="num-cell" data-val="158.00">158.00</td>
+          <td class="num-cell" data-val="153.60">153.60</td>
+          <td class="num-cell"><div class="dev-bar"><div class="bar-track"><div class="bar-pos" style="width:14%"></div></div><span class="positive">+2.86%</span></div></td>
+          <td class="num-cell" data-val="131.27">131.27</td>
+          <td class="num-cell"><div class="dev-bar"><div class="bar-track"><div class="bar-pos" style="width:100%"></div></div><span class="positive">+20.36%</span></div></td>
+          <td class="reason-cell" title="連續3日第1款｜第2次處置">連續3日第1款｜第2次處置</td>
+        </tr>
+        <tr data-code="4764" data-name="雙鍵" data-market="市"
+            data-rem="3天" data-dev="36.95" data-dev10="14.46">
+          <td class="market-m">市</td>
+          <td class="code-cell"><a href="https://goodinfo.tw/tw/StockInfo.asp?STOCK_ID=4764" target="_blank" rel="noopener">4764</a></td>
+          <td class="name-cell"><a href="https://tw.stock.yahoo.com/quote/4764" target="_blank" rel="noopener">雙鍵</a></td>
+          <td><span class="interval-badge">20分</span></td>
+          <td>04-21</td>
+          <td>05-05</td>
+          <td>05-06</td>
+          <td><span class="remaining-badge rem-soon">3天</span></td>
+          <td class="num-cell" data-val="252.50">252.50</td>
+          <td class="num-cell" data-val="220.60">220.60</td>
+          <td class="num-cell"><div class="dev-bar"><div class="bar-track"><div class="bar-pos" style="width:72%"></div></div><span class="positive">+14.46%</span></div></td>
+          <td class="num-cell" data-val="184.38">184.38</td>
+          <td class="num-cell"><div class="dev-bar"><div class="bar-track"><div class="bar-pos" style="width:100%"></div></div><span class="positive">+36.95%</span></div></td>
+          <td class="reason-cell" title="連續3日第1款｜第2次處置">連續3日第1款｜第2次處置</td>
+        </tr>
+        <tr data-code="6456" data-name="GIS-KY" data-market="市"
+            data-rem="3天" data-dev="16.86" data-dev10="1.24">
+          <td class="market-m">市</td>
+          <td class="code-cell"><a href="https://goodinfo.tw/tw/StockInfo.asp?STOCK_ID=6456" target="_blank" rel="noopener">6456</a></td>
+          <td class="name-cell"><a href="https://tw.stock.yahoo.com/quote/6456" target="_blank" rel="noopener">GIS-KY</a></td>
+          <td><span class="interval-badge">5分</span></td>
+          <td>04-21</td>
+          <td>05-05</td>
+          <td>05-06</td>
+          <td><span class="remaining-badge rem-soon">3天</span></td>
+          <td class="num-cell" data-val="79.00">79.00</td>
+          <td class="num-cell" data-val="78.03">78.03</td>
+          <td class="num-cell"><div class="dev-bar"><div class="bar-track"><div class="bar-pos" style="width:6%"></div></div><span class="positive">+1.24%</span></div></td>
+          <td class="num-cell" data-val="67.60">67.60</td>
+          <td class="num-cell"><div class="dev-bar"><div class="bar-track"><div class="bar-pos" style="width:84%"></div></div><span class="positive">+16.86%</span></div></td>
+          <td class="reason-cell" title="連續3日第1款｜第1次處置">連續3日第1款｜第1次處置</td>
+        </tr>
+        <tr data-code="8438" data-name="昶昕" data-market="市"
+            data-rem="3天" data-dev="6.33" data-dev10="1.83">
+          <td class="market-m">市</td>
+          <td class="code-cell"><a href="https://goodinfo.tw/tw/StockInfo.asp?STOCK_ID=8438" target="_blank" rel="noopener">8438</a></td>
+          <td class="name-cell"><a href="https://tw.stock.yahoo.com/quote/8438" target="_blank" rel="noopener">昶昕</a></td>
+          <td><span class="interval-badge">5分</span></td>
+          <td>04-21</td>
+          <td>05-05</td>
+          <td>05-06</td>
+          <td><span class="remaining-badge rem-soon">3天</span></td>
+          <td class="num-cell" data-val="88.90">88.90</td>
+          <td class="num-cell" data-val="87.30">87.30</td>
+          <td class="num-cell"><div class="dev-bar"><div class="bar-track"><div class="bar-pos" style="width:9%"></div></div><span class="positive">+1.83%</span></div></td>
+          <td class="num-cell" data-val="83.61">83.61</td>
+          <td class="num-cell"><div class="dev-bar"><div class="bar-track"><div class="bar-pos" style="width:32%"></div></div><span class="positive">+6.33%</span></div></td>
+          <td class="reason-cell" title="10日內6次（第1~7款）｜第1次處置">10日內6次（第1~7款）｜第1次處置</td>
+        </tr>
+        <tr data-code="3555" data-name="博士旺" data-market="櫃"
+            data-rem="3天" data-dev="14.34" data-dev10="1.77">
+          <td class="market-k">櫃</td>
+          <td class="code-cell"><a href="https://goodinfo.tw/tw/StockInfo.asp?STOCK_ID=3555" target="_blank" rel="noopener">3555</a></td>
+          <td class="name-cell"><a href="https://tw.stock.yahoo.com/quote/3555" target="_blank" rel="noopener">博士旺</a></td>
+          <td><span class="interval-badge">20分</span></td>
+          <td>04-21</td>
+          <td>05-05</td>
+          <td>05-06</td>
+          <td><span class="remaining-badge rem-soon">3天</span></td>
+          <td class="num-cell" data-val="249.50">249.50</td>
+          <td class="num-cell" data-val="245.15">245.15</td>
+          <td class="num-cell"><div class="dev-bar"><div class="bar-track"><div class="bar-pos" style="width:9%"></div></div><span class="positive">+1.77%</span></div></td>
+          <td class="num-cell" data-val="218.20">218.20</td>
+          <td class="num-cell"><div class="dev-bar"><div class="bar-track"><div class="bar-pos" style="width:72%"></div></div><span class="positive">+14.34%</span></div></td>
+          <td class="reason-cell" title="連續3日第一款">連續3日第一款</td>
+        </tr>
+        <tr data-code="4908" data-name="前鼎" data-market="櫃"
+            data-rem="3天" data-dev="35.48" data-dev10="12.93">
+          <td class="market-k">櫃</td>
+          <td class="code-cell"><a href="https://goodinfo.tw/tw/StockInfo.asp?STOCK_ID=4908" target="_blank" rel="noopener">4908</a></td>
+          <td class="name-cell"><a href="https://tw.stock.yahoo.com/quote/4908" target="_blank" rel="noopener">前鼎</a></td>
+          <td><span class="interval-badge">20分</span></td>
+          <td>04-21</td>
+          <td>05-05</td>
+          <td>05-06</td>
+          <td><span class="remaining-badge rem-soon">3天</span></td>
+          <td class="num-cell" data-val="210.00">210.00</td>
+          <td class="num-cell" data-val="185.95">185.95</td>
+          <td class="num-cell"><div class="dev-bar"><div class="bar-track"><div class="bar-pos" style="width:65%"></div></div><span class="positive">+12.93%</span></div></td>
+          <td class="num-cell" data-val="155.00">155.00</td>
+          <td class="num-cell"><div class="dev-bar"><div class="bar-track"><div class="bar-pos" style="width:100%"></div></div><span class="positive">+35.48%</span></div></td>
+          <td class="reason-cell" title="連續3日第一款">連續3日第一款</td>
+        </tr>
+        <tr data-code="4979" data-name="華星光" data-market="櫃"
+            data-rem="3天" data-dev="15.09" data-dev10="0.41">
+          <td class="market-k">櫃</td>
+          <td class="code-cell"><a href="https://goodinfo.tw/tw/StockInfo.asp?STOCK_ID=4979" target="_blank" rel="noopener">4979</a></td>
+          <td class="name-cell"><a href="https://tw.stock.yahoo.com/quote/4979" target="_blank" rel="noopener">華星光</a></td>
+          <td><span class="interval-badge">20分</span></td>
+          <td>04-21</td>
+          <td>05-05</td>
+          <td>05-06</td>
+          <td><span class="remaining-badge rem-soon">3天</span></td>
+          <td class="num-cell" data-val="611.00">611.00</td>
+          <td class="num-cell" data-val="608.50">608.50</td>
+          <td class="num-cell"><div class="dev-bar"><div class="bar-track"><div class="bar-pos" style="width:2%"></div></div><span class="positive">+0.41%</span></div></td>
+          <td class="num-cell" data-val="530.90">530.90</td>
+          <td class="num-cell"><div class="dev-bar"><div class="bar-track"><div class="bar-pos" style="width:75%"></div></div><span class="positive">+15.09%</span></div></td>
+          <td class="reason-cell" title="連續3日第一款">連續3日第一款</td>
+        </tr>
+        <tr data-code="5340" data-name="建榮" data-market="櫃"
+            data-rem="3天" data-dev="0.44" data-dev10="-0.61">
+          <td class="market-k">櫃</td>
+          <td class="code-cell"><a href="https://goodinfo.tw/tw/StockInfo.asp?STOCK_ID=5340" target="_blank" rel="noopener">5340</a></td>
+          <td class="name-cell"><a href="https://tw.stock.yahoo.com/quote/5340" target="_blank" rel="noopener">建榮</a></td>
+          <td><span class="interval-badge">20分</span></td>
+          <td>04-21</td>
+          <td>05-05</td>
+          <td>05-06</td>
+          <td><span class="remaining-badge rem-soon">3天</span></td>
+          <td class="num-cell" data-val="115.00">115.00</td>
+          <td class="num-cell" data-val="115.70">115.70</td>
+          <td class="num-cell"><div class="dev-bar"><div class="bar-track"><div class="bar-neg" style="width:3%"></div></div><span class="negative">-0.61%</span></div></td>
+          <td class="num-cell" data-val="114.50">114.50</td>
+          <td class="num-cell"><div class="dev-bar"><div class="bar-track"><div class="bar-pos" style="width:2%"></div></div><span class="positive">+0.44%</span></div></td>
+          <td class="reason-cell" title="10日內6次">10日內6次</td>
+        </tr>
+        <tr data-code="6173" data-name="信昌電" data-market="櫃"
+            data-rem="3天" data-dev="12.92" data-dev10="0.98">
+          <td class="market-k">櫃</td>
+          <td class="code-cell"><a href="https://goodinfo.tw/tw/StockInfo.asp?STOCK_ID=6173" target="_blank" rel="noopener">6173</a></td>
+          <td class="name-cell"><a href="https://tw.stock.yahoo.com/quote/6173" target="_blank" rel="noopener">信昌電</a></td>
+          <td><span class="interval-badge">5分</span></td>
+          <td>04-21</td>
+          <td>05-05</td>
+          <td>05-06</td>
+          <td><span class="remaining-badge rem-soon">3天</span></td>
+          <td class="num-cell" data-val="85.80">85.80</td>
+          <td class="num-cell" data-val="84.97">84.97</td>
+          <td class="num-cell"><div class="dev-bar"><div class="bar-track"><div class="bar-pos" style="width:5%"></div></div><span class="positive">+0.98%</span></div></td>
+          <td class="num-cell" data-val="75.98">75.98</td>
+          <td class="num-cell"><div class="dev-bar"><div class="bar-track"><div class="bar-pos" style="width:65%"></div></div><span class="positive">+12.92%</span></div></td>
+          <td class="reason-cell" title="連續3日第一款">連續3日第一款</td>
+        </tr>
+        <tr data-code="6208" data-name="日揚" data-market="櫃"
+            data-rem="3天" data-dev="13.50" data-dev10="-1.66">
+          <td class="market-k">櫃</td>
+          <td class="code-cell"><a href="https://goodinfo.tw/tw/StockInfo.asp?STOCK_ID=6208" target="_blank" rel="noopener">6208</a></td>
+          <td class="name-cell"><a href="https://tw.stock.yahoo.com/quote/6208" target="_blank" rel="noopener">日揚</a></td>
+          <td><span class="interval-badge">5分</span></td>
+          <td>04-21</td>
+          <td>05-05</td>
+          <td>05-06</td>
+          <td><span class="remaining-badge rem-soon">3天</span></td>
+          <td class="num-cell" data-val="78.80">78.80</td>
+          <td class="num-cell" data-val="80.13">80.13</td>
+          <td class="num-cell"><div class="dev-bar"><div class="bar-track"><div class="bar-neg" style="width:8%"></div></div><span class="negative">-1.66%</span></div></td>
+          <td class="num-cell" data-val="69.43">69.43</td>
+          <td class="num-cell"><div class="dev-bar"><div class="bar-track"><div class="bar-pos" style="width:68%"></div></div><span class="positive">+13.50%</span></div></td>
+          <td class="reason-cell" title="連續3日第一款">連續3日第一款</td>
+        </tr>
+        <tr data-code="6791" data-name="虎門科技" data-market="櫃"
+            data-rem="3天" data-dev="6.15" data-dev10="-3.18">
+          <td class="market-k">櫃</td>
+          <td class="code-cell"><a href="https://goodinfo.tw/tw/StockInfo.asp?STOCK_ID=6791" target="_blank" rel="noopener">6791</a></td>
+          <td class="name-cell"><a href="https://tw.stock.yahoo.com/quote/6791" target="_blank" rel="noopener">虎門科技</a></td>
+          <td><span class="interval-badge">5分</span></td>
+          <td>04-21</td>
+          <td>05-05</td>
+          <td>05-06</td>
+          <td><span class="remaining-badge rem-soon">3天</span></td>
+          <td class="num-cell" data-val="125.00">125.00</td>
+          <td class="num-cell" data-val="129.10">129.10</td>
+          <td class="num-cell"><div class="dev-bar"><div class="bar-track"><div class="bar-neg" style="width:16%"></div></div><span class="negative">-3.18%</span></div></td>
+          <td class="num-cell" data-val="117.76">117.76</td>
+          <td class="num-cell"><div class="dev-bar"><div class="bar-track"><div class="bar-pos" style="width:31%"></div></div><span class="positive">+6.15%</span></div></td>
+          <td class="reason-cell" title="連續3日第一款">連續3日第一款</td>
+        </tr>
+        <tr data-code="2484" data-name="希華" data-market="市"
+            data-rem="4天" data-dev="7.09" data-dev10="-6.62">
+          <td class="market-m">市</td>
+          <td class="code-cell"><a href="https://goodinfo.tw/tw/StockInfo.asp?STOCK_ID=2484" target="_blank" rel="noopener">2484</a></td>
+          <td class="name-cell"><a href="https://tw.stock.yahoo.com/quote/2484" target="_blank" rel="noopener">希華</a></td>
+          <td><span class="interval-badge">5分</span></td>
+          <td>04-22</td>
+          <td>05-06</td>
+          <td>05-07</td>
+          <td><span class="remaining-badge rem-long">4天</span></td>
+          <td class="num-cell" data-val="39.90">39.90</td>
+          <td class="num-cell" data-val="42.73">42.73</td>
+          <td class="num-cell"><div class="dev-bar"><div class="bar-track"><div class="bar-neg" style="width:33%"></div></div><span class="negative">-6.62%</span></div></td>
+          <td class="num-cell" data-val="37.26">37.26</td>
+          <td class="num-cell"><div class="dev-bar"><div class="bar-track"><div class="bar-pos" style="width:35%"></div></div><span class="positive">+7.09%</span></div></td>
+          <td class="reason-cell" title="連續3日第1款｜第1次處置">連續3日第1款｜第1次處置</td>
+        </tr>
+        <tr data-code="4919" data-name="新唐" data-market="市"
+            data-rem="4天" data-dev="22.32" data-dev10="2.63">
+          <td class="market-m">市</td>
+          <td class="code-cell"><a href="https://goodinfo.tw/tw/StockInfo.asp?STOCK_ID=4919" target="_blank" rel="noopener">4919</a></td>
+          <td class="name-cell"><a href="https://tw.stock.yahoo.com/quote/4919" target="_blank" rel="noopener">新唐</a></td>
+          <td><span class="interval-badge">5分</span></td>
+          <td>04-22</td>
+          <td>05-06</td>
+          <td>05-07</td>
+          <td><span class="remaining-badge rem-long">4天</span></td>
+          <td class="num-cell" data-val="144.50">144.50</td>
+          <td class="num-cell" data-val="140.80">140.80</td>
+          <td class="num-cell"><div class="dev-bar"><div class="bar-track"><div class="bar-pos" style="width:13%"></div></div><span class="positive">+2.63%</span></div></td>
+          <td class="num-cell" data-val="118.13">118.13</td>
+          <td class="num-cell"><div class="dev-bar"><div class="bar-track"><div class="bar-pos" style="width:100%"></div></div><span class="positive">+22.32%</span></div></td>
+          <td class="reason-cell" title="連續3日第1款｜第1次處置">連續3日第1款｜第1次處置</td>
+        </tr>
+        <tr data-code="4956" data-name="光鋐" data-market="市"
+            data-rem="4天" data-dev="11.97" data-dev10="-2.64">
+          <td class="market-m">市</td>
+          <td class="code-cell"><a href="https://goodinfo.tw/tw/StockInfo.asp?STOCK_ID=4956" target="_blank" rel="noopener">4956</a></td>
+          <td class="name-cell"><a href="https://tw.stock.yahoo.com/quote/4956" target="_blank" rel="noopener">光鋐</a></td>
+          <td><span class="interval-badge">5分</span></td>
+          <td>04-22</td>
+          <td>05-06</td>
+          <td>05-07</td>
+          <td><span class="remaining-badge rem-long">4天</span></td>
+          <td class="num-cell" data-val="48.25">48.25</td>
+          <td class="num-cell" data-val="49.56">49.56</td>
+          <td class="num-cell"><div class="dev-bar"><div class="bar-track"><div class="bar-neg" style="width:13%"></div></div><span class="negative">-2.64%</span></div></td>
+          <td class="num-cell" data-val="43.09">43.09</td>
+          <td class="num-cell"><div class="dev-bar"><div class="bar-track"><div class="bar-pos" style="width:60%"></div></div><span class="positive">+11.97%</span></div></td>
+          <td class="reason-cell" title="連續3日第1款｜第1次處置">連續3日第1款｜第1次處置</td>
+        </tr>
+        <tr data-code="6141" data-name="柏承" data-market="市"
+            data-rem="4天" data-dev="18.08" data-dev10="0.82">
+          <td class="market-m">市</td>
+          <td class="code-cell"><a href="https://goodinfo.tw/tw/StockInfo.asp?STOCK_ID=6141" target="_blank" rel="noopener">6141</a></td>
+          <td class="name-cell"><a href="https://tw.stock.yahoo.com/quote/6141" target="_blank" rel="noopener">柏承</a></td>
+          <td><span class="interval-badge">20分</span></td>
+          <td>04-22</td>
+          <td>05-06</td>
+          <td>05-07</td>
+          <td><span class="remaining-badge rem-long">4天</span></td>
+          <td class="num-cell" data-val="32.00">32.00</td>
+          <td class="num-cell" data-val="31.74">31.74</td>
+          <td class="num-cell"><div class="dev-bar"><div class="bar-track"><div class="bar-pos" style="width:4%"></div></div><span class="positive">+0.82%</span></div></td>
+          <td class="num-cell" data-val="27.10">27.10</td>
+          <td class="num-cell"><div class="dev-bar"><div class="bar-track"><div class="bar-pos" style="width:90%"></div></div><span class="positive">+18.08%</span></div></td>
+          <td class="reason-cell" title="連續5日（第1~7款）｜第2次處置">連續5日（第1~7款）｜第2次處置</td>
+        </tr>
+        <tr data-code="6442" data-name="光聖" data-market="市"
+            data-rem="4天" data-dev="0.74" data-dev10="1.37">
+          <td class="market-m">市</td>
+          <td class="code-cell"><a href="https://goodinfo.tw/tw/StockInfo.asp?STOCK_ID=6442" target="_blank" rel="noopener">6442</a></td>
+          <td class="name-cell"><a href="https://tw.stock.yahoo.com/quote/6442" target="_blank" rel="noopener">光聖</a></td>
+          <td><span class="interval-badge">5分</span></td>
+          <td>04-22</td>
+          <td>05-06</td>
+          <td>05-07</td>
+          <td><span class="remaining-badge rem-long">4天</span></td>
+          <td class="num-cell" data-val="2105.00">2105.00</td>
+          <td class="num-cell" data-val="2076.50">2076.50</td>
+          <td class="num-cell"><div class="dev-bar"><div class="bar-track"><div class="bar-pos" style="width:7%"></div></div><span class="positive">+1.37%</span></div></td>
+          <td class="num-cell" data-val="2089.50">2089.50</td>
+          <td class="num-cell"><div class="dev-bar"><div class="bar-track"><div class="bar-pos" style="width:4%"></div></div><span class="positive">+0.74%</span></div></td>
+          <td class="reason-cell" title="10日內6次（第1~7款）｜第1次處置">10日內6次（第1~7款）｜第1次處置</td>
+        </tr>
+        <tr data-code="3388" data-name="崇越電" data-market="櫃"
+            data-rem="4天" data-dev="24.54" data-dev10="3.13">
+          <td class="market-k">櫃</td>
+          <td class="code-cell"><a href="https://goodinfo.tw/tw/StockInfo.asp?STOCK_ID=3388" target="_blank" rel="noopener">3388</a></td>
+          <td class="name-cell"><a href="https://tw.stock.yahoo.com/quote/3388" target="_blank" rel="noopener">崇越電</a></td>
+          <td><span class="interval-badge">5分</span></td>
+          <td>04-22</td>
+          <td>05-06</td>
+          <td>05-07</td>
+          <td><span class="remaining-badge rem-long">4天</span></td>
+          <td class="num-cell" data-val="114.50">114.50</td>
+          <td class="num-cell" data-val="111.03">111.03</td>
+          <td class="num-cell"><div class="dev-bar"><div class="bar-track"><div class="bar-pos" style="width:16%"></div></div><span class="positive">+3.13%</span></div></td>
+          <td class="num-cell" data-val="91.94">91.94</td>
+          <td class="num-cell"><div class="dev-bar"><div class="bar-track"><div class="bar-pos" style="width:100%"></div></div><span class="positive">+24.54%</span></div></td>
+          <td class="reason-cell" title="連續3日第一款">連續3日第一款</td>
+        </tr>
+        <tr data-code="3529" data-name="力旺" data-market="櫃"
+            data-rem="4天" data-dev="7.98" data-dev10="-5.45">
+          <td class="market-k">櫃</td>
+          <td class="code-cell"><a href="https://goodinfo.tw/tw/StockInfo.asp?STOCK_ID=3529" target="_blank" rel="noopener">3529</a></td>
+          <td class="name-cell"><a href="https://tw.stock.yahoo.com/quote/3529" target="_blank" rel="noopener">力旺</a></td>
+          <td><span class="interval-badge">5分</span></td>
+          <td>04-22</td>
+          <td>05-06</td>
+          <td>05-07</td>
+          <td><span class="remaining-badge rem-long">4天</span></td>
+          <td class="num-cell" data-val="3835.00">3835.00</td>
+          <td class="num-cell" data-val="4056.00">4056.00</td>
+          <td class="num-cell"><div class="dev-bar"><div class="bar-track"><div class="bar-neg" style="width:27%"></div></div><span class="negative">-5.45%</span></div></td>
+          <td class="num-cell" data-val="3551.50">3551.50</td>
+          <td class="num-cell"><div class="dev-bar"><div class="bar-track"><div class="bar-pos" style="width:40%"></div></div><span class="positive">+7.98%</span></div></td>
+          <td class="reason-cell" title="連續3日第一款">連續3日第一款</td>
+        </tr>
+        <tr data-code="4939" data-name="亞電" data-market="櫃"
+            data-rem="4天" data-dev="18.79" data-dev10="1.75">
+          <td class="market-k">櫃</td>
+          <td class="code-cell"><a href="https://goodinfo.tw/tw/StockInfo.asp?STOCK_ID=4939" target="_blank" rel="noopener">4939</a></td>
+          <td class="name-cell"><a href="https://tw.stock.yahoo.com/quote/4939" target="_blank" rel="noopener">亞電</a></td>
+          <td><span class="interval-badge">5分</span></td>
+          <td>04-22</td>
+          <td>05-06</td>
+          <td>05-07</td>
+          <td><span class="remaining-badge rem-long">4天</span></td>
+          <td class="num-cell" data-val="44.20">44.20</td>
+          <td class="num-cell" data-val="43.44">43.44</td>
+          <td class="num-cell"><div class="dev-bar"><div class="bar-track"><div class="bar-pos" style="width:9%"></div></div><span class="positive">+1.75%</span></div></td>
+          <td class="num-cell" data-val="37.21">37.21</td>
+          <td class="num-cell"><div class="dev-bar"><div class="bar-track"><div class="bar-pos" style="width:94%"></div></div><span class="positive">+18.79%</span></div></td>
+          <td class="reason-cell" title="連續3日第一款">連續3日第一款</td>
+        </tr>
+        <tr data-code="5475" data-name="德宏" data-market="櫃"
+            data-rem="4天" data-dev="10.01" data-dev10="-1.29">
+          <td class="market-k">櫃</td>
+          <td class="code-cell"><a href="https://goodinfo.tw/tw/StockInfo.asp?STOCK_ID=5475" target="_blank" rel="noopener">5475</a></td>
+          <td class="name-cell"><a href="https://tw.stock.yahoo.com/quote/5475" target="_blank" rel="noopener">德宏</a></td>
+          <td><span class="interval-badge">5分</span></td>
+          <td>04-22</td>
+          <td>05-06</td>
+          <td>05-07</td>
+          <td><span class="remaining-badge rem-long">4天</span></td>
+          <td class="num-cell" data-val="355.00">355.00</td>
+          <td class="num-cell" data-val="359.65">359.65</td>
+          <td class="num-cell"><div class="dev-bar"><div class="bar-track"><div class="bar-neg" style="width:6%"></div></div><span class="negative">-1.29%</span></div></td>
+          <td class="num-cell" data-val="322.70">322.70</td>
+          <td class="num-cell"><div class="dev-bar"><div class="bar-track"><div class="bar-pos" style="width:50%"></div></div><span class="positive">+10.01%</span></div></td>
+          <td class="reason-cell" title="連續3日第一款">連續3日第一款</td>
+        </tr>
+        <tr data-code="8182" data-name="加高" data-market="櫃"
+            data-rem="4天" data-dev="8.22" data-dev10="-3.81">
+          <td class="market-k">櫃</td>
+          <td class="code-cell"><a href="https://goodinfo.tw/tw/StockInfo.asp?STOCK_ID=8182" target="_blank" rel="noopener">8182</a></td>
+          <td class="name-cell"><a href="https://tw.stock.yahoo.com/quote/8182" target="_blank" rel="noopener">加高</a></td>
+          <td><span class="interval-badge">5分</span></td>
+          <td>04-22</td>
+          <td>05-06</td>
+          <td>05-07</td>
+          <td><span class="remaining-badge rem-long">4天</span></td>
+          <td class="num-cell" data-val="37.40">37.40</td>
+          <td class="num-cell" data-val="38.88">38.88</td>
+          <td class="num-cell"><div class="dev-bar"><div class="bar-track"><div class="bar-neg" style="width:19%"></div></div><span class="negative">-3.81%</span></div></td>
+          <td class="num-cell" data-val="34.56">34.56</td>
+          <td class="num-cell"><div class="dev-bar"><div class="bar-track"><div class="bar-pos" style="width:41%"></div></div><span class="positive">+8.22%</span></div></td>
+          <td class="reason-cell" title="連續3日第一款">連續3日第一款</td>
+        </tr>
+        <tr data-code="8289" data-name="泰藝" data-market="櫃"
+            data-rem="4天" data-dev="5.41" data-dev10="-4.84">
+          <td class="market-k">櫃</td>
+          <td class="code-cell"><a href="https://goodinfo.tw/tw/StockInfo.asp?STOCK_ID=8289" target="_blank" rel="noopener">8289</a></td>
+          <td class="name-cell"><a href="https://tw.stock.yahoo.com/quote/8289" target="_blank" rel="noopener">泰藝</a></td>
+          <td><span class="interval-badge">5分</span></td>
+          <td>04-22</td>
+          <td>05-06</td>
+          <td>05-07</td>
+          <td><span class="remaining-badge rem-long">4天</span></td>
+          <td class="num-cell" data-val="46.20">46.20</td>
+          <td class="num-cell" data-val="48.55">48.55</td>
+          <td class="num-cell"><div class="dev-bar"><div class="bar-track"><div class="bar-neg" style="width:24%"></div></div><span class="negative">-4.84%</span></div></td>
+          <td class="num-cell" data-val="43.83">43.83</td>
+          <td class="num-cell"><div class="dev-bar"><div class="bar-track"><div class="bar-pos" style="width:27%"></div></div><span class="positive">+5.41%</span></div></td>
+          <td class="reason-cell" title="連續3日第一款">連續3日第一款</td>
+        </tr>
+        <tr data-code="8358" data-name="金居" data-market="櫃"
+            data-rem="4天" data-dev="19.17" data-dev10="4.14">
+          <td class="market-k">櫃</td>
+          <td class="code-cell"><a href="https://goodinfo.tw/tw/StockInfo.asp?STOCK_ID=8358" target="_blank" rel="noopener">8358</a></td>
+          <td class="name-cell"><a href="https://tw.stock.yahoo.com/quote/8358" target="_blank" rel="noopener">金居</a></td>
+          <td><span class="interval-badge">5分</span></td>
+          <td>04-22</td>
+          <td>05-06</td>
+          <td>05-07</td>
+          <td><span class="remaining-badge rem-long">4天</span></td>
+          <td class="num-cell" data-val="390.00">390.00</td>
+          <td class="num-cell" data-val="374.50">374.50</td>
+          <td class="num-cell"><div class="dev-bar"><div class="bar-track"><div class="bar-pos" style="width:21%"></div></div><span class="positive">+4.14%</span></div></td>
+          <td class="num-cell" data-val="327.25">327.25</td>
+          <td class="num-cell"><div class="dev-bar"><div class="bar-track"><div class="bar-pos" style="width:96%"></div></div><span class="positive">+19.17%</span></div></td>
+          <td class="reason-cell" title="連續3日第一款">連續3日第一款</td>
+        </tr>
+        <tr data-code="3518" data-name="柏騰" data-market="市"
+            data-rem="5天" data-dev="29.45" data-dev10="9.86">
+          <td class="market-m">市</td>
+          <td class="code-cell"><a href="https://goodinfo.tw/tw/StockInfo.asp?STOCK_ID=3518" target="_blank" rel="noopener">3518</a></td>
+          <td class="name-cell"><a href="https://tw.stock.yahoo.com/quote/3518" target="_blank" rel="noopener">柏騰</a></td>
+          <td><span class="interval-badge">5分</span></td>
+          <td>04-23</td>
+          <td>05-07</td>
+          <td>05-08</td>
+          <td><span class="remaining-badge rem-long">5天</span></td>
+          <td class="num-cell" data-val="33.10">33.10</td>
+          <td class="num-cell" data-val="30.13">30.13</td>
+          <td class="num-cell"><div class="dev-bar"><div class="bar-track"><div class="bar-pos" style="width:49%"></div></div><span class="positive">+9.86%</span></div></td>
+          <td class="num-cell" data-val="25.57">25.57</td>
+          <td class="num-cell"><div class="dev-bar"><div class="bar-track"><div class="bar-pos" style="width:100%"></div></div><span class="positive">+29.45%</span></div></td>
+          <td class="reason-cell" title="連續3日第1款｜第1次處置">連續3日第1款｜第1次處置</td>
+        </tr>
+        <tr data-code="4960" data-name="誠美材" data-market="市"
+            data-rem="5天" data-dev="27.36" data-dev10="1.83">
+          <td class="market-m">市</td>
+          <td class="code-cell"><a href="https://goodinfo.tw/tw/StockInfo.asp?STOCK_ID=4960" target="_blank" rel="noopener">4960</a></td>
+          <td class="name-cell"><a href="https://tw.stock.yahoo.com/quote/4960" target="_blank" rel="noopener">誠美材</a></td>
+          <td><span class="interval-badge">20分</span></td>
+          <td>04-23</td>
+          <td>05-07</td>
+          <td>05-08</td>
+          <td><span class="remaining-badge rem-long">5天</span></td>
+          <td class="num-cell" data-val="39.05">39.05</td>
+          <td class="num-cell" data-val="38.35">38.35</td>
+          <td class="num-cell"><div class="dev-bar"><div class="bar-track"><div class="bar-pos" style="width:9%"></div></div><span class="positive">+1.83%</span></div></td>
+          <td class="num-cell" data-val="30.66">30.66</td>
+          <td class="num-cell"><div class="dev-bar"><div class="bar-track"><div class="bar-pos" style="width:100%"></div></div><span class="positive">+27.36%</span></div></td>
+          <td class="reason-cell" title="連續3日第1款｜第2次處置">連續3日第1款｜第2次處置</td>
+        </tr>
+        <tr data-code="3221" data-name="台嘉碩" data-market="櫃"
+            data-rem="5天" data-dev="2.41" data-dev10="-6.04">
+          <td class="market-k">櫃</td>
+          <td class="code-cell"><a href="https://goodinfo.tw/tw/StockInfo.asp?STOCK_ID=3221" target="_blank" rel="noopener">3221</a></td>
+          <td class="name-cell"><a href="https://tw.stock.yahoo.com/quote/3221" target="_blank" rel="noopener">台嘉碩</a></td>
+          <td><span class="interval-badge">5分</span></td>
+          <td>04-23</td>
+          <td>05-07</td>
+          <td>05-08</td>
+          <td><span class="remaining-badge rem-long">5天</span></td>
+          <td class="num-cell" data-val="42.90">42.90</td>
+          <td class="num-cell" data-val="45.66">45.66</td>
+          <td class="num-cell"><div class="dev-bar"><div class="bar-track"><div class="bar-neg" style="width:30%"></div></div><span class="negative">-6.04%</span></div></td>
+          <td class="num-cell" data-val="41.89">41.89</td>
+          <td class="num-cell"><div class="dev-bar"><div class="bar-track"><div class="bar-pos" style="width:12%"></div></div><span class="positive">+2.41%</span></div></td>
+          <td class="reason-cell" title="連續3日第一款">連續3日第一款</td>
+        </tr>
+        <tr data-code="3339" data-name="泰谷" data-market="櫃"
+            data-rem="5天" data-dev="4.67" data-dev10="-6.27">
+          <td class="market-k">櫃</td>
+          <td class="code-cell"><a href="https://goodinfo.tw/tw/StockInfo.asp?STOCK_ID=3339" target="_blank" rel="noopener">3339</a></td>
+          <td class="name-cell"><a href="https://tw.stock.yahoo.com/quote/3339" target="_blank" rel="noopener">泰谷</a></td>
+          <td><span class="interval-badge">20分</span></td>
+          <td>04-23</td>
+          <td>05-07</td>
+          <td>05-08</td>
+          <td><span class="remaining-badge rem-long">5天</span></td>
+          <td class="num-cell" data-val="57.10">57.10</td>
+          <td class="num-cell" data-val="60.92">60.92</td>
+          <td class="num-cell"><div class="dev-bar"><div class="bar-track"><div class="bar-neg" style="width:31%"></div></div><span class="negative">-6.27%</span></div></td>
+          <td class="num-cell" data-val="54.55">54.55</td>
+          <td class="num-cell"><div class="dev-bar"><div class="bar-track"><div class="bar-pos" style="width:23%"></div></div><span class="positive">+4.67%</span></div></td>
+          <td class="reason-cell" title="連續3日第一款">連續3日第一款</td>
+        </tr>
+        <tr data-code="6829" data-name="千附精密" data-market="櫃"
+            data-rem="5天" data-dev="37.11" data-dev10="8.57">
+          <td class="market-k">櫃</td>
+          <td class="code-cell"><a href="https://goodinfo.tw/tw/StockInfo.asp?STOCK_ID=6829" target="_blank" rel="noopener">6829</a></td>
+          <td class="name-cell"><a href="https://tw.stock.yahoo.com/quote/6829" target="_blank" rel="noopener">千附精密</a></td>
+          <td><span class="interval-badge">20分</span></td>
+          <td>04-23</td>
+          <td>05-07</td>
+          <td>05-08</td>
+          <td><span class="remaining-badge rem-long">5天</span></td>
+          <td class="num-cell" data-val="254.00">254.00</td>
+          <td class="num-cell" data-val="233.95">233.95</td>
+          <td class="num-cell"><div class="dev-bar"><div class="bar-track"><div class="bar-pos" style="width:43%"></div></div><span class="positive">+8.57%</span></div></td>
+          <td class="num-cell" data-val="185.25">185.25</td>
+          <td class="num-cell"><div class="dev-bar"><div class="bar-track"><div class="bar-pos" style="width:100%"></div></div><span class="positive">+37.11%</span></div></td>
+          <td class="reason-cell" title="連續3日第一款">連續3日第一款</td>
+        </tr>
+        <tr data-code="1623" data-name="大東電" data-market="市"
+            data-rem="6天" data-dev="15.55" data-dev10="2.52">
+          <td class="market-m">市</td>
+          <td class="code-cell"><a href="https://goodinfo.tw/tw/StockInfo.asp?STOCK_ID=1623" target="_blank" rel="noopener">1623</a></td>
+          <td class="name-cell"><a href="https://tw.stock.yahoo.com/quote/1623" target="_blank" rel="noopener">大東電</a></td>
+          <td><span class="interval-badge">5分</span></td>
+          <td>04-24</td>
+          <td>05-08</td>
+          <td>05-11</td>
+          <td><span class="remaining-badge rem-long">6天</span></td>
+          <td class="num-cell" data-val="240.00">240.00</td>
+          <td class="num-cell" data-val="234.10">234.10</td>
+          <td class="num-cell"><div class="dev-bar"><div class="bar-track"><div class="bar-pos" style="width:13%"></div></div><span class="positive">+2.52%</span></div></td>
+          <td class="num-cell" data-val="207.70">207.70</td>
+          <td class="num-cell"><div class="dev-bar"><div class="bar-track"><div class="bar-pos" style="width:78%"></div></div><span class="positive">+15.55%</span></div></td>
+          <td class="reason-cell" title="連續3日第1款｜第1次處置">連續3日第1款｜第1次處置</td>
+        </tr>
+        <tr data-code="1711" data-name="永光" data-market="市"
+            data-rem="6天" data-dev="23.25" data-dev10="6.19">
+          <td class="market-m">市</td>
+          <td class="code-cell"><a href="https://goodinfo.tw/tw/StockInfo.asp?STOCK_ID=1711" target="_blank" rel="noopener">1711</a></td>
+          <td class="name-cell"><a href="https://tw.stock.yahoo.com/quote/1711" target="_blank" rel="noopener">永光</a></td>
+          <td><span class="interval-badge">20分</span></td>
+          <td>04-24</td>
+          <td>05-08</td>
+          <td>05-11</td>
+          <td><span class="remaining-badge rem-long">6天</span></td>
+          <td class="num-cell" data-val="56.30">56.30</td>
+          <td class="num-cell" data-val="53.02">53.02</td>
+          <td class="num-cell"><div class="dev-bar"><div class="bar-track"><div class="bar-pos" style="width:31%"></div></div><span class="positive">+6.19%</span></div></td>
+          <td class="num-cell" data-val="45.68">45.68</td>
+          <td class="num-cell"><div class="dev-bar"><div class="bar-track"><div class="bar-pos" style="width:100%"></div></div><span class="positive">+23.25%</span></div></td>
+          <td class="reason-cell" title="連續5日（第1~7款）｜第2次處置">連續5日（第1~7款）｜第2次處置</td>
+        </tr>
+        <tr data-code="1721" data-name="三晃" data-market="市"
+            data-rem="6天" data-dev="13.72" data-dev10="-1.94">
+          <td class="market-m">市</td>
+          <td class="code-cell"><a href="https://goodinfo.tw/tw/StockInfo.asp?STOCK_ID=1721" target="_blank" rel="noopener">1721</a></td>
+          <td class="name-cell"><a href="https://tw.stock.yahoo.com/quote/1721" target="_blank" rel="noopener">三晃</a></td>
+          <td><span class="interval-badge">5分</span></td>
+          <td>04-24</td>
+          <td>05-08</td>
+          <td>05-11</td>
+          <td><span class="remaining-badge rem-long">6天</span></td>
+          <td class="num-cell" data-val="24.20">24.20</td>
+          <td class="num-cell" data-val="24.68">24.68</td>
+          <td class="num-cell"><div class="dev-bar"><div class="bar-track"><div class="bar-neg" style="width:10%"></div></div><span class="negative">-1.94%</span></div></td>
+          <td class="num-cell" data-val="21.28">21.28</td>
+          <td class="num-cell"><div class="dev-bar"><div class="bar-track"><div class="bar-pos" style="width:69%"></div></div><span class="positive">+13.72%</span></div></td>
+          <td class="reason-cell" title="連續3日第1款｜第1次處置">連續3日第1款｜第1次處置</td>
+        </tr>
+        <tr data-code="3229" data-name="晟鈦" data-market="市"
+            data-rem="6天" data-dev="32.38" data-dev10="4.49">
+          <td class="market-m">市</td>
+          <td class="code-cell"><a href="https://goodinfo.tw/tw/StockInfo.asp?STOCK_ID=3229" target="_blank" rel="noopener">3229</a></td>
+          <td class="name-cell"><a href="https://tw.stock.yahoo.com/quote/3229" target="_blank" rel="noopener">晟鈦</a></td>
+          <td><span class="interval-badge">20分</span></td>
+          <td>04-24</td>
+          <td>05-08</td>
+          <td>05-11</td>
+          <td><span class="remaining-badge rem-long">6天</span></td>
+          <td class="num-cell" data-val="37.45">37.45</td>
+          <td class="num-cell" data-val="35.84">35.84</td>
+          <td class="num-cell"><div class="dev-bar"><div class="bar-track"><div class="bar-pos" style="width:22%"></div></div><span class="positive">+4.49%</span></div></td>
+          <td class="num-cell" data-val="28.29">28.29</td>
+          <td class="num-cell"><div class="dev-bar"><div class="bar-track"><div class="bar-pos" style="width:100%"></div></div><span class="positive">+32.38%</span></div></td>
+          <td class="reason-cell" title="連續3日第1款｜第2次處置">連續3日第1款｜第2次處置</td>
+        </tr>
+        <tr data-code="3653" data-name="健策" data-market="市"
+            data-rem="6天" data-dev="18.14" data-dev10="5.36">
+          <td class="market-m">市</td>
+          <td class="code-cell"><a href="https://goodinfo.tw/tw/StockInfo.asp?STOCK_ID=3653" target="_blank" rel="noopener">3653</a></td>
+          <td class="name-cell"><a href="https://tw.stock.yahoo.com/quote/3653" target="_blank" rel="noopener">健策</a></td>
+          <td><span class="interval-badge">5分</span></td>
+          <td>04-24</td>
+          <td>05-08</td>
+          <td>05-11</td>
+          <td><span class="remaining-badge rem-long">6天</span></td>
+          <td class="num-cell" data-val="5350.00">5350.00</td>
+          <td class="num-cell" data-val="5078.00">5078.00</td>
+          <td class="num-cell"><div class="dev-bar"><div class="bar-track"><div class="bar-pos" style="width:27%"></div></div><span class="positive">+5.36%</span></div></td>
+          <td class="num-cell" data-val="4528.50">4528.50</td>
+          <td class="num-cell"><div class="dev-bar"><div class="bar-track"><div class="bar-pos" style="width:91%"></div></div><span class="positive">+18.14%</span></div></td>
+          <td class="reason-cell" title="連續3日第1款｜第1次處置">連續3日第1款｜第1次處置</td>
+        </tr>
+        <tr data-code="6415" data-name="矽力*-KY" data-market="市"
+            data-rem="6天" data-dev="26.80" data-dev10="9.18">
+          <td class="market-m">市</td>
+          <td class="code-cell"><a href="https://goodinfo.tw/tw/StockInfo.asp?STOCK_ID=6415" target="_blank" rel="noopener">6415</a></td>
+          <td class="name-cell"><a href="https://tw.stock.yahoo.com/quote/6415" target="_blank" rel="noopener">矽力*-KY</a></td>
+          <td><span class="interval-badge">5分</span></td>
+          <td>04-24</td>
+          <td>05-08</td>
+          <td>05-11</td>
+          <td><span class="remaining-badge rem-long">6天</span></td>
+          <td class="num-cell" data-val="423.00">423.00</td>
+          <td class="num-cell" data-val="387.45">387.45</td>
+          <td class="num-cell"><div class="dev-bar"><div class="bar-track"><div class="bar-pos" style="width:46%"></div></div><span class="positive">+9.18%</span></div></td>
+          <td class="num-cell" data-val="333.60">333.60</td>
+          <td class="num-cell"><div class="dev-bar"><div class="bar-track"><div class="bar-pos" style="width:100%"></div></div><span class="positive">+26.80%</span></div></td>
+          <td class="reason-cell" title="連續3日第1款｜第1次處置">連續3日第1款｜第1次處置</td>
+        </tr>
+        <tr data-code="8271" data-name="宇瞻" data-market="市"
+            data-rem="6天" data-dev="23.74" data-dev10="6.98">
+          <td class="market-m">市</td>
+          <td class="code-cell"><a href="https://goodinfo.tw/tw/StockInfo.asp?STOCK_ID=8271" target="_blank" rel="noopener">8271</a></td>
+          <td class="name-cell"><a href="https://tw.stock.yahoo.com/quote/8271" target="_blank" rel="noopener">宇瞻</a></td>
+          <td><span class="interval-badge">20分</span></td>
+          <td>04-24</td>
+          <td>05-08</td>
+          <td>05-11</td>
+          <td><span class="remaining-badge rem-long">6天</span></td>
+          <td class="num-cell" data-val="221.50">221.50</td>
+          <td class="num-cell" data-val="207.05">207.05</td>
+          <td class="num-cell"><div class="dev-bar"><div class="bar-track"><div class="bar-pos" style="width:35%"></div></div><span class="positive">+6.98%</span></div></td>
+          <td class="num-cell" data-val="179.00">179.00</td>
+          <td class="num-cell"><div class="dev-bar"><div class="bar-track"><div class="bar-pos" style="width:100%"></div></div><span class="positive">+23.74%</span></div></td>
+          <td class="reason-cell" title="連續3日第1款｜第2次處置">連續3日第1款｜第2次處置</td>
+        </tr>
+        <tr data-code="3363" data-name="上詮" data-market="櫃"
+            data-rem="6天" data-dev="0.38" data-dev10="-7.33">
+          <td class="market-k">櫃</td>
+          <td class="code-cell"><a href="https://goodinfo.tw/tw/StockInfo.asp?STOCK_ID=3363" target="_blank" rel="noopener">3363</a></td>
+          <td class="name-cell"><a href="https://tw.stock.yahoo.com/quote/3363" target="_blank" rel="noopener">上詮</a></td>
+          <td><span class="interval-badge">20分</span></td>
+          <td>04-24</td>
+          <td>05-08</td>
+          <td>05-11</td>
+          <td><span class="remaining-badge rem-long">6天</span></td>
+          <td class="num-cell" data-val="797.00">797.00</td>
+          <td class="num-cell" data-val="860.00">860.00</td>
+          <td class="num-cell"><div class="dev-bar"><div class="bar-track"><div class="bar-neg" style="width:37%"></div></div><span class="negative">-7.33%</span></div></td>
+          <td class="num-cell" data-val="793.95">793.95</td>
+          <td class="num-cell"><div class="dev-bar"><div class="bar-track"><div class="bar-pos" style="width:2%"></div></div><span class="positive">+0.38%</span></div></td>
+          <td class="reason-cell" title="10日內6次">10日內6次</td>
+        </tr>
+        <tr data-code="4768" data-name="晶呈科技" data-market="櫃"
+            data-rem="6天" data-dev="2.57" data-dev10="-1.05">
+          <td class="market-k">櫃</td>
+          <td class="code-cell"><a href="https://goodinfo.tw/tw/StockInfo.asp?STOCK_ID=4768" target="_blank" rel="noopener">4768</a></td>
+          <td class="name-cell"><a href="https://tw.stock.yahoo.com/quote/4768" target="_blank" rel="noopener">晶呈科技</a></td>
+          <td><span class="interval-badge">5分</span></td>
+          <td>04-24</td>
+          <td>05-08</td>
+          <td>05-11</td>
+          <td><span class="remaining-badge rem-long">6天</span></td>
+          <td class="num-cell" data-val="497.50">497.50</td>
+          <td class="num-cell" data-val="502.80">502.80</td>
+          <td class="num-cell"><div class="dev-bar"><div class="bar-track"><div class="bar-neg" style="width:5%"></div></div><span class="negative">-1.05%</span></div></td>
+          <td class="num-cell" data-val="485.02">485.02</td>
+          <td class="num-cell"><div class="dev-bar"><div class="bar-track"><div class="bar-pos" style="width:13%"></div></div><span class="positive">+2.57%</span></div></td>
+          <td class="reason-cell" title="10日內6次">10日內6次</td>
+        </tr>
+        <tr data-code="5498" data-name="凱崴" data-market="櫃"
+            data-rem="6天" data-dev="8.58" data-dev10="-0.58">
+          <td class="market-k">櫃</td>
+          <td class="code-cell"><a href="https://goodinfo.tw/tw/StockInfo.asp?STOCK_ID=5498" target="_blank" rel="noopener">5498</a></td>
+          <td class="name-cell"><a href="https://tw.stock.yahoo.com/quote/5498" target="_blank" rel="noopener">凱崴</a></td>
+          <td><span class="interval-badge">5分</span></td>
+          <td>04-24</td>
+          <td>05-08</td>
+          <td>05-11</td>
+          <td><span class="remaining-badge rem-long">6天</span></td>
+          <td class="num-cell" data-val="73.30">73.30</td>
+          <td class="num-cell" data-val="73.73">73.73</td>
+          <td class="num-cell"><div class="dev-bar"><div class="bar-track"><div class="bar-neg" style="width:3%"></div></div><span class="negative">-0.58%</span></div></td>
+          <td class="num-cell" data-val="67.51">67.51</td>
+          <td class="num-cell"><div class="dev-bar"><div class="bar-track"><div class="bar-pos" style="width:43%"></div></div><span class="positive">+8.58%</span></div></td>
+          <td class="reason-cell" title="10日內6次">10日內6次</td>
+        </tr>
+        <tr data-code="6423" data-name="億而得" data-market="櫃"
+            data-rem="6天" data-dev="10.75" data-dev10="-2.52">
+          <td class="market-k">櫃</td>
+          <td class="code-cell"><a href="https://goodinfo.tw/tw/StockInfo.asp?STOCK_ID=6423" target="_blank" rel="noopener">6423</a></td>
+          <td class="name-cell"><a href="https://tw.stock.yahoo.com/quote/6423" target="_blank" rel="noopener">億而得</a></td>
+          <td><span class="interval-badge">5分</span></td>
+          <td>04-24</td>
+          <td>05-08</td>
+          <td>05-11</td>
+          <td><span class="remaining-badge rem-long">6天</span></td>
+          <td class="num-cell" data-val="108.00">108.00</td>
+          <td class="num-cell" data-val="110.79">110.79</td>
+          <td class="num-cell"><div class="dev-bar"><div class="bar-track"><div class="bar-neg" style="width:13%"></div></div><span class="negative">-2.52%</span></div></td>
+          <td class="num-cell" data-val="97.52">97.52</td>
+          <td class="num-cell"><div class="dev-bar"><div class="bar-track"><div class="bar-pos" style="width:54%"></div></div><span class="positive">+10.75%</span></div></td>
+          <td class="reason-cell" title="連續3日第一款">連續3日第一款</td>
+        </tr>
+        <tr data-code="6643" data-name="M31" data-market="櫃"
+            data-rem="6天" data-dev="7.81" data-dev10="-0.11">
+          <td class="market-k">櫃</td>
+          <td class="code-cell"><a href="https://goodinfo.tw/tw/StockInfo.asp?STOCK_ID=6643" target="_blank" rel="noopener">6643</a></td>
+          <td class="name-cell"><a href="https://tw.stock.yahoo.com/quote/6643" target="_blank" rel="noopener">M31</a></td>
+          <td><span class="interval-badge">5分</span></td>
+          <td>04-24</td>
+          <td>05-08</td>
+          <td>05-11</td>
+          <td><span class="remaining-badge rem-long">6天</span></td>
+          <td class="num-cell" data-val="556.00">556.00</td>
+          <td class="num-cell" data-val="556.60">556.60</td>
+          <td class="num-cell"><div class="dev-bar"><div class="bar-track"><div class="bar-neg" style="width:1%"></div></div><span class="negative">-0.11%</span></div></td>
+          <td class="num-cell" data-val="515.73">515.73</td>
+          <td class="num-cell"><div class="dev-bar"><div class="bar-track"><div class="bar-pos" style="width:39%"></div></div><span class="positive">+7.81%</span></div></td>
+          <td class="reason-cell" title="連續5日">連續5日</td>
+        </tr>
+        <tr data-code="8092" data-name="建暐" data-market="櫃"
+            data-rem="6天" data-dev="14.69" data-dev10="-1.03">
+          <td class="market-k">櫃</td>
+          <td class="code-cell"><a href="https://goodinfo.tw/tw/StockInfo.asp?STOCK_ID=8092" target="_blank" rel="noopener">8092</a></td>
+          <td class="name-cell"><a href="https://tw.stock.yahoo.com/quote/8092" target="_blank" rel="noopener">建暐</a></td>
+          <td><span class="interval-badge">5分</span></td>
+          <td>04-24</td>
+          <td>05-08</td>
+          <td>05-11</td>
+          <td><span class="remaining-badge rem-long">6天</span></td>
+          <td class="num-cell" data-val="16.40">16.40</td>
+          <td class="num-cell" data-val="16.57">16.57</td>
+          <td class="num-cell"><div class="dev-bar"><div class="bar-track"><div class="bar-neg" style="width:5%"></div></div><span class="negative">-1.03%</span></div></td>
+          <td class="num-cell" data-val="14.30">14.30</td>
+          <td class="num-cell"><div class="dev-bar"><div class="bar-track"><div class="bar-pos" style="width:73%"></div></div><span class="positive">+14.69%</span></div></td>
+          <td class="reason-cell" title="連續3日第一款">連續3日第一款</td>
+        </tr>
+        <tr data-code="6213" data-name="聯茂" data-market="市"
+            data-rem="7天" data-dev="16.22" data-dev10="0.00">
+          <td class="market-m">市</td>
+          <td class="code-cell"><a href="https://goodinfo.tw/tw/StockInfo.asp?STOCK_ID=6213" target="_blank" rel="noopener">6213</a></td>
+          <td class="name-cell"><a href="https://tw.stock.yahoo.com/quote/6213" target="_blank" rel="noopener">聯茂</a></td>
+          <td><span class="interval-badge">5分</span></td>
+          <td>04-23</td>
+          <td>05-11</td>
+          <td>05-12</td>
+          <td><span class="remaining-badge rem-long">7天</span></td>
+          <td class="num-cell" data-val="271.00">271.00</td>
+          <td class="num-cell" data-val="271.00">271.00</td>
+          <td class="num-cell"><div class="dev-bar"><div class="bar-track"><div class="bar-neg" style="width:0%"></div></div><span class="neutral">0.00%</span></div></td>
+          <td class="num-cell" data-val="233.18">233.18</td>
+          <td class="num-cell"><div class="dev-bar"><div class="bar-track"><div class="bar-pos" style="width:81%"></div></div><span class="positive">+16.22%</span></div></td>
+          <td class="reason-cell" title="連續三次及當日沖銷標準｜第1次處置">連續三次及當日沖銷標準｜第1次處置</td>
+        </tr>
+        <tr data-code="6531" data-name="愛普*" data-market="市"
+            data-rem="7天" data-dev="45.23" data-dev10="22.39">
+          <td class="market-m">市</td>
+          <td class="code-cell"><a href="https://goodinfo.tw/tw/StockInfo.asp?STOCK_ID=6531" target="_blank" rel="noopener">6531</a></td>
+          <td class="name-cell"><a href="https://tw.stock.yahoo.com/quote/6531" target="_blank" rel="noopener">愛普*</a></td>
+          <td><span class="interval-badge">5分</span></td>
+          <td>04-27</td>
+          <td>05-11</td>
+          <td>05-12</td>
+          <td><span class="remaining-badge rem-long">7天</span></td>
+          <td class="num-cell" data-val="902.00">902.00</td>
+          <td class="num-cell" data-val="737.00">737.00</td>
+          <td class="num-cell"><div class="dev-bar"><div class="bar-track"><div class="bar-pos" style="width:100%"></div></div><span class="positive">+22.39%</span></div></td>
+          <td class="num-cell" data-val="621.10">621.10</td>
+          <td class="num-cell"><div class="dev-bar"><div class="bar-track"><div class="bar-pos" style="width:100%"></div></div><span class="positive">+45.23%</span></div></td>
+          <td class="reason-cell" title="連續3日第1款｜第1次處置">連續3日第1款｜第1次處置</td>
+        </tr>
+        <tr data-code="8021" data-name="尖點" data-market="市"
+            data-rem="7天" data-dev="11.84" data-dev10="-4.24">
+          <td class="market-m">市</td>
+          <td class="code-cell"><a href="https://goodinfo.tw/tw/StockInfo.asp?STOCK_ID=8021" target="_blank" rel="noopener">8021</a></td>
+          <td class="name-cell"><a href="https://tw.stock.yahoo.com/quote/8021" target="_blank" rel="noopener">尖點</a></td>
+          <td><span class="interval-badge">20分</span></td>
+          <td>04-27</td>
+          <td>05-11</td>
+          <td>05-12</td>
+          <td><span class="remaining-badge rem-long">7天</span></td>
+          <td class="num-cell" data-val="395.00">395.00</td>
+          <td class="num-cell" data-val="412.50">412.50</td>
+          <td class="num-cell"><div class="dev-bar"><div class="bar-track"><div class="bar-neg" style="width:21%"></div></div><span class="negative">-4.24%</span></div></td>
+          <td class="num-cell" data-val="353.18">353.18</td>
+          <td class="num-cell"><div class="dev-bar"><div class="bar-track"><div class="bar-pos" style="width:59%"></div></div><span class="positive">+11.84%</span></div></td>
+          <td class="reason-cell" title="連續3日第1款｜第2次處置">連續3日第1款｜第2次處置</td>
+        </tr>
+        <tr data-code="3228" data-name="金麗科" data-market="櫃"
+            data-rem="7天" data-dev="24.20" data-dev10="5.62">
+          <td class="market-k">櫃</td>
+          <td class="code-cell"><a href="https://goodinfo.tw/tw/StockInfo.asp?STOCK_ID=3228" target="_blank" rel="noopener">3228</a></td>
+          <td class="name-cell"><a href="https://tw.stock.yahoo.com/quote/3228" target="_blank" rel="noopener">金麗科</a></td>
+          <td><span class="interval-badge">5分</span></td>
+          <td>04-27</td>
+          <td>05-11</td>
+          <td>05-12</td>
+          <td><span class="remaining-badge rem-long">7天</span></td>
+          <td class="num-cell" data-val="200.00">200.00</td>
+          <td class="num-cell" data-val="189.35">189.35</td>
+          <td class="num-cell"><div class="dev-bar"><div class="bar-track"><div class="bar-pos" style="width:28%"></div></div><span class="positive">+5.62%</span></div></td>
+          <td class="num-cell" data-val="161.03">161.03</td>
+          <td class="num-cell"><div class="dev-bar"><div class="bar-track"><div class="bar-pos" style="width:100%"></div></div><span class="positive">+24.20%</span></div></td>
+          <td class="reason-cell" title="連續3日第一款">連續3日第一款</td>
+        </tr>
+        <tr data-code="3430" data-name="奇鈦科" data-market="櫃"
+            data-rem="7天" data-dev="34.02" data-dev10="12.10">
+          <td class="market-k">櫃</td>
+          <td class="code-cell"><a href="https://goodinfo.tw/tw/StockInfo.asp?STOCK_ID=3430" target="_blank" rel="noopener">3430</a></td>
+          <td class="name-cell"><a href="https://tw.stock.yahoo.com/quote/3430" target="_blank" rel="noopener">奇鈦科</a></td>
+          <td><span class="interval-badge">5分</span></td>
+          <td>04-27</td>
+          <td>05-11</td>
+          <td>05-12</td>
+          <td><span class="remaining-badge rem-long">7天</span></td>
+          <td class="num-cell" data-val="123.00">123.00</td>
+          <td class="num-cell" data-val="109.72">109.72</td>
+          <td class="num-cell"><div class="dev-bar"><div class="bar-track"><div class="bar-pos" style="width:60%"></div></div><span class="positive">+12.10%</span></div></td>
+          <td class="num-cell" data-val="91.78">91.78</td>
+          <td class="num-cell"><div class="dev-bar"><div class="bar-track"><div class="bar-pos" style="width:100%"></div></div><span class="positive">+34.02%</span></div></td>
+          <td class="reason-cell" title="連續3日第一款">連續3日第一款</td>
+        </tr>
+        <tr data-code="3581" data-name="博磊" data-market="櫃"
+            data-rem="7天" data-dev="52.56" data-dev10="16.07">
+          <td class="market-k">櫃</td>
+          <td class="code-cell"><a href="https://goodinfo.tw/tw/StockInfo.asp?STOCK_ID=3581" target="_blank" rel="noopener">3581</a></td>
+          <td class="name-cell"><a href="https://tw.stock.yahoo.com/quote/3581" target="_blank" rel="noopener">博磊</a></td>
+          <td><span class="interval-badge">20分</span></td>
+          <td>04-27</td>
+          <td>05-11</td>
+          <td>05-12</td>
+          <td><span class="remaining-badge rem-long">7天</span></td>
+          <td class="num-cell" data-val="175.50">175.50</td>
+          <td class="num-cell" data-val="151.20">151.20</td>
+          <td class="num-cell"><div class="dev-bar"><div class="bar-track"><div class="bar-pos" style="width:80%"></div></div><span class="positive">+16.07%</span></div></td>
+          <td class="num-cell" data-val="115.04">115.04</td>
+          <td class="num-cell"><div class="dev-bar"><div class="bar-track"><div class="bar-pos" style="width:100%"></div></div><span class="positive">+52.56%</span></div></td>
+          <td class="reason-cell" title="連續3日第一款">連續3日第一款</td>
+        </tr>
+        <tr data-code="3631" data-name="晟楠" data-market="櫃"
+            data-rem="7天" data-dev="21.66" data-dev10="5.70">
+          <td class="market-k">櫃</td>
+          <td class="code-cell"><a href="https://goodinfo.tw/tw/StockInfo.asp?STOCK_ID=3631" target="_blank" rel="noopener">3631</a></td>
+          <td class="name-cell"><a href="https://tw.stock.yahoo.com/quote/3631" target="_blank" rel="noopener">晟楠</a></td>
+          <td><span class="interval-badge">5分</span></td>
+          <td>04-27</td>
+          <td>05-11</td>
+          <td>05-12</td>
+          <td><span class="remaining-badge rem-long">7天</span></td>
+          <td class="num-cell" data-val="38.75">38.75</td>
+          <td class="num-cell" data-val="36.66">36.66</td>
+          <td class="num-cell"><div class="dev-bar"><div class="bar-track"><div class="bar-pos" style="width:29%"></div></div><span class="positive">+5.70%</span></div></td>
+          <td class="num-cell" data-val="31.85">31.85</td>
+          <td class="num-cell"><div class="dev-bar"><div class="bar-track"><div class="bar-pos" style="width:100%"></div></div><span class="positive">+21.66%</span></div></td>
+          <td class="reason-cell" title="連續3日第一款">連續3日第一款</td>
+        </tr>
+        <tr data-code="4971" data-name="IET-KY" data-market="櫃"
+            data-rem="7天" data-dev="11.31" data-dev10="0.57">
+          <td class="market-k">櫃</td>
+          <td class="code-cell"><a href="https://goodinfo.tw/tw/StockInfo.asp?STOCK_ID=4971" target="_blank" rel="noopener">4971</a></td>
+          <td class="name-cell"><a href="https://tw.stock.yahoo.com/quote/4971" target="_blank" rel="noopener">IET-KY</a></td>
+          <td><span class="interval-badge">20分</span></td>
+          <td>04-27</td>
+          <td>05-11</td>
+          <td>05-12</td>
+          <td><span class="remaining-badge rem-long">7天</span></td>
+          <td class="num-cell" data-val="799.00">799.00</td>
+          <td class="num-cell" data-val="794.50">794.50</td>
+          <td class="num-cell"><div class="dev-bar"><div class="bar-track"><div class="bar-pos" style="width:3%"></div></div><span class="positive">+0.57%</span></div></td>
+          <td class="num-cell" data-val="717.80">717.80</td>
+          <td class="num-cell"><div class="dev-bar"><div class="bar-track"><div class="bar-pos" style="width:57%"></div></div><span class="positive">+11.31%</span></div></td>
+          <td class="reason-cell" title="連續5日">連續5日</td>
+        </tr>
+        <tr data-code="6217" data-name="中探針" data-market="櫃"
+            data-rem="7天" data-dev="18.50" data-dev10="4.58">
+          <td class="market-k">櫃</td>
+          <td class="code-cell"><a href="https://goodinfo.tw/tw/StockInfo.asp?STOCK_ID=6217" target="_blank" rel="noopener">6217</a></td>
+          <td class="name-cell"><a href="https://tw.stock.yahoo.com/quote/6217" target="_blank" rel="noopener">中探針</a></td>
+          <td><span class="interval-badge">20分</span></td>
+          <td>04-27</td>
+          <td>05-11</td>
+          <td>05-12</td>
+          <td><span class="remaining-badge rem-long">7天</span></td>
+          <td class="num-cell" data-val="290.00">290.00</td>
+          <td class="num-cell" data-val="277.30">277.30</td>
+          <td class="num-cell"><div class="dev-bar"><div class="bar-track"><div class="bar-pos" style="width:23%"></div></div><span class="positive">+4.58%</span></div></td>
+          <td class="num-cell" data-val="244.72">244.72</td>
+          <td class="num-cell"><div class="dev-bar"><div class="bar-track"><div class="bar-pos" style="width:92%"></div></div><span class="positive">+18.50%</span></div></td>
+          <td class="reason-cell" title="連續3日第一款">連續3日第一款</td>
+        </tr>
+        <tr data-code="2429" data-name="銘旺科" data-market="市"
+            data-rem="8天" data-dev="18.97" data-dev10="6.45">
+          <td class="market-m">市</td>
+          <td class="code-cell"><a href="https://goodinfo.tw/tw/StockInfo.asp?STOCK_ID=2429" target="_blank" rel="noopener">2429</a></td>
+          <td class="name-cell"><a href="https://tw.stock.yahoo.com/quote/2429" target="_blank" rel="noopener">銘旺科</a></td>
+          <td><span class="interval-badge">5分</span></td>
+          <td>04-28</td>
+          <td>05-12</td>
+          <td>05-13</td>
+          <td><span class="remaining-badge rem-long">8天</span></td>
+          <td class="num-cell" data-val="53.00">53.00</td>
+          <td class="num-cell" data-val="49.79">49.79</td>
+          <td class="num-cell"><div class="dev-bar"><div class="bar-track"><div class="bar-pos" style="width:32%"></div></div><span class="positive">+6.45%</span></div></td>
+          <td class="num-cell" data-val="44.55">44.55</td>
+          <td class="num-cell"><div class="dev-bar"><div class="bar-track"><div class="bar-pos" style="width:95%"></div></div><span class="positive">+18.97%</span></div></td>
+          <td class="reason-cell" title="連續3日第1款｜第1次處置">連續3日第1款｜第1次處置</td>
+        </tr>
+        <tr data-code="6443" data-name="元晶" data-market="市"
+            data-rem="8天" data-dev="-8.62" data-dev10="-7.75">
+          <td class="market-m">市</td>
+          <td class="code-cell"><a href="https://goodinfo.tw/tw/StockInfo.asp?STOCK_ID=6443" target="_blank" rel="noopener">6443</a></td>
+          <td class="name-cell"><a href="https://tw.stock.yahoo.com/quote/6443" target="_blank" rel="noopener">元晶</a></td>
+          <td><span class="interval-badge">20分</span></td>
+          <td>04-28</td>
+          <td>05-12</td>
+          <td>05-13</td>
+          <td><span class="remaining-badge rem-long">8天</span></td>
+          <td class="num-cell" data-val="35.00">35.00</td>
+          <td class="num-cell" data-val="37.94">37.94</td>
+          <td class="num-cell"><div class="dev-bar"><div class="bar-track"><div class="bar-neg" style="width:39%"></div></div><span class="negative">-7.75%</span></div></td>
+          <td class="num-cell" data-val="38.30">38.30</td>
+          <td class="num-cell"><div class="dev-bar"><div class="bar-track"><div class="bar-neg" style="width:43%"></div></div><span class="negative">-8.62%</span></div></td>
+          <td class="reason-cell" title="10日內6次（第1~7款）｜第2次處置">10日內6次（第1~7款）｜第2次處置</td>
+        </tr>
+        <tr data-code="7734" data-name="印能科技" data-market="櫃"
+            data-rem="8天" data-dev="24.38" data-dev10="9.91">
+          <td class="market-k">櫃</td>
+          <td class="code-cell"><a href="https://goodinfo.tw/tw/StockInfo.asp?STOCK_ID=7734" target="_blank" rel="noopener">7734</a></td>
+          <td class="name-cell"><a href="https://tw.stock.yahoo.com/quote/7734" target="_blank" rel="noopener">印能科技</a></td>
+          <td><span class="interval-badge">20分</span></td>
+          <td>04-28</td>
+          <td>05-12</td>
+          <td>05-13</td>
+          <td><span class="remaining-badge rem-long">8天</span></td>
+          <td class="num-cell" data-val="3500.00">3500.00</td>
+          <td class="num-cell" data-val="3184.50">3184.50</td>
+          <td class="num-cell"><div class="dev-bar"><div class="bar-track"><div class="bar-pos" style="width:50%"></div></div><span class="positive">+9.91%</span></div></td>
+          <td class="num-cell" data-val="2814.00">2814.00</td>
+          <td class="num-cell"><div class="dev-bar"><div class="bar-track"><div class="bar-pos" style="width:100%"></div></div><span class="positive">+24.38%</span></div></td>
+          <td class="reason-cell" title="連續3日第一款">連續3日第一款</td>
+        </tr>
+        <tr data-code="6658" data-name="聯策" data-market="市"
+            data-rem="9天" data-dev="66.65" data-dev10="45.25">
+          <td class="market-m">市</td>
+          <td class="code-cell"><a href="https://goodinfo.tw/tw/StockInfo.asp?STOCK_ID=6658" target="_blank" rel="noopener">6658</a></td>
+          <td class="name-cell"><a href="https://tw.stock.yahoo.com/quote/6658" target="_blank" rel="noopener">聯策</a></td>
+          <td><span class="interval-badge">5分</span></td>
+          <td>04-29</td>
+          <td>05-13</td>
+          <td>05-14</td>
+          <td><span class="remaining-badge rem-long">9天</span></td>
+          <td class="num-cell" data-val="149.00">149.00</td>
+          <td class="num-cell" data-val="102.58">102.58</td>
+          <td class="num-cell"><div class="dev-bar"><div class="bar-track"><div class="bar-pos" style="width:100%"></div></div><span class="positive">+45.25%</span></div></td>
+          <td class="num-cell" data-val="89.41">89.41</td>
+          <td class="num-cell"><div class="dev-bar"><div class="bar-track"><div class="bar-pos" style="width:100%"></div></div><span class="positive">+66.65%</span></div></td>
+          <td class="reason-cell" title="連續3日第1款｜第1次處置">連續3日第1款｜第1次處置</td>
+        </tr>
+        <tr data-code="6861" data-name="睿生光電" data-market="市"
+            data-rem="9天" data-dev="80.39" data-dev10="44.52">
+          <td class="market-m">市</td>
+          <td class="code-cell"><a href="https://goodinfo.tw/tw/StockInfo.asp?STOCK_ID=6861" target="_blank" rel="noopener">6861</a></td>
+          <td class="name-cell"><a href="https://tw.stock.yahoo.com/quote/6861" target="_blank" rel="noopener">睿生光電</a></td>
+          <td><span class="interval-badge">20分</span></td>
+          <td>04-29</td>
+          <td>05-13</td>
+          <td>05-14</td>
+          <td><span class="remaining-badge rem-long">9天</span></td>
+          <td class="num-cell" data-val="322.50">322.50</td>
+          <td class="num-cell" data-val="223.15">223.15</td>
+          <td class="num-cell"><div class="dev-bar"><div class="bar-track"><div class="bar-pos" style="width:100%"></div></div><span class="positive">+44.52%</span></div></td>
+          <td class="num-cell" data-val="178.78">178.78</td>
+          <td class="num-cell"><div class="dev-bar"><div class="bar-track"><div class="bar-pos" style="width:100%"></div></div><span class="positive">+80.39%</span></div></td>
+          <td class="reason-cell" title="連續3日第1款｜第2次處置">連續3日第1款｜第2次處置</td>
+        </tr>
+        <tr data-code="7711" data-name="永擎" data-market="市"
+            data-rem="9天" data-dev="29.40" data-dev10="15.55">
+          <td class="market-m">市</td>
+          <td class="code-cell"><a href="https://goodinfo.tw/tw/StockInfo.asp?STOCK_ID=7711" target="_blank" rel="noopener">7711</a></td>
+          <td class="name-cell"><a href="https://tw.stock.yahoo.com/quote/7711" target="_blank" rel="noopener">永擎</a></td>
+          <td><span class="interval-badge">20分</span></td>
+          <td>04-29</td>
+          <td>05-13</td>
+          <td>05-14</td>
+          <td><span class="remaining-badge rem-long">9天</span></td>
+          <td class="num-cell" data-val="415.00">415.00</td>
+          <td class="num-cell" data-val="359.15">359.15</td>
+          <td class="num-cell"><div class="dev-bar"><div class="bar-track"><div class="bar-pos" style="width:78%"></div></div><span class="positive">+15.55%</span></div></td>
+          <td class="num-cell" data-val="320.70">320.70</td>
+          <td class="num-cell"><div class="dev-bar"><div class="bar-track"><div class="bar-pos" style="width:100%"></div></div><span class="positive">+29.40%</span></div></td>
+          <td class="reason-cell" title="連續3日第1款｜第2次處置">連續3日第1款｜第2次處置</td>
+        </tr>
+        <tr data-code="7751" data-name="竑騰" data-market="櫃"
+            data-rem="9天" data-dev="18.13" data-dev10="7.53">
+          <td class="market-k">櫃</td>
+          <td class="code-cell"><a href="https://goodinfo.tw/tw/StockInfo.asp?STOCK_ID=7751" target="_blank" rel="noopener">7751</a></td>
+          <td class="name-cell"><a href="https://tw.stock.yahoo.com/quote/7751" target="_blank" rel="noopener">竑騰</a></td>
+          <td><span class="interval-badge">20分</span></td>
+          <td>04-29</td>
+          <td>05-13</td>
+          <td>05-14</td>
+          <td><span class="remaining-badge rem-long">9天</span></td>
+          <td class="num-cell" data-val="2450.00">2450.00</td>
+          <td class="num-cell" data-val="2278.50">2278.50</td>
+          <td class="num-cell"><div class="dev-bar"><div class="bar-track"><div class="bar-pos" style="width:38%"></div></div><span class="positive">+7.53%</span></div></td>
+          <td class="num-cell" data-val="2074.00">2074.00</td>
+          <td class="num-cell"><div class="dev-bar"><div class="bar-track"><div class="bar-pos" style="width:91%"></div></div><span class="positive">+18.13%</span></div></td>
+          <td class="reason-cell" title="連續3日第一款">連續3日第一款</td>
+        </tr>
+        <tr data-code="4529" data-name="淳紳" data-market="櫃"
+            data-rem="10天" data-dev="32.90" data-dev10="11.04">
+          <td class="market-k">櫃</td>
+          <td class="code-cell"><a href="https://goodinfo.tw/tw/StockInfo.asp?STOCK_ID=4529" target="_blank" rel="noopener">4529</a></td>
+          <td class="name-cell"><a href="https://tw.stock.yahoo.com/quote/4529" target="_blank" rel="noopener">淳紳</a></td>
+          <td><span class="interval-badge">10分</span></td>
+          <td>04-30</td>
+          <td>05-14</td>
+          <td>05-15</td>
+          <td><span class="remaining-badge rem-long">10天</span></td>
+          <td class="num-cell" data-val="5.13">5.13</td>
+          <td class="num-cell" data-val="4.62">4.62</td>
+          <td class="num-cell"><div class="dev-bar"><div class="bar-track"><div class="bar-pos" style="width:55%"></div></div><span class="positive">+11.04%</span></div></td>
+          <td class="num-cell" data-val="3.86">3.86</td>
+          <td class="num-cell"><div class="dev-bar"><div class="bar-track"><div class="bar-pos" style="width:100%"></div></div><span class="positive">+32.90%</span></div></td>
+          <td class="reason-cell" title="連續3日第一款">連續3日第一款</td>
+        </tr>
+        <tr data-code="4542" data-name="科嶠" data-market="櫃"
+            data-rem="10天" data-dev="12.62" data-dev10="9.99">
+          <td class="market-k">櫃</td>
+          <td class="code-cell"><a href="https://goodinfo.tw/tw/StockInfo.asp?STOCK_ID=4542" target="_blank" rel="noopener">4542</a></td>
+          <td class="name-cell"><a href="https://tw.stock.yahoo.com/quote/4542" target="_blank" rel="noopener">科嶠</a></td>
+          <td><span class="interval-badge">5分</span></td>
+          <td>04-30</td>
+          <td>05-14</td>
+          <td>05-15</td>
+          <td><span class="remaining-badge rem-long">10天</span></td>
+          <td class="num-cell" data-val="195.50">195.50</td>
+          <td class="num-cell" data-val="177.75">177.75</td>
+          <td class="num-cell"><div class="dev-bar"><div class="bar-track"><div class="bar-pos" style="width:50%"></div></div><span class="positive">+9.99%</span></div></td>
+          <td class="num-cell" data-val="173.60">173.60</td>
+          <td class="num-cell"><div class="dev-bar"><div class="bar-track"><div class="bar-pos" style="width:63%"></div></div><span class="positive">+12.62%</span></div></td>
+          <td class="reason-cell" title="10日內6次">10日內6次</td>
+        </tr>
+        <tr data-code="6735" data-name="美達科技" data-market="櫃"
+            data-rem="10天" data-dev="39.26" data-dev10="10.91">
+          <td class="market-k">櫃</td>
+          <td class="code-cell"><a href="https://goodinfo.tw/tw/StockInfo.asp?STOCK_ID=6735" target="_blank" rel="noopener">6735</a></td>
+          <td class="name-cell"><a href="https://tw.stock.yahoo.com/quote/6735" target="_blank" rel="noopener">美達科技</a></td>
+          <td><span class="interval-badge">20分</span></td>
+          <td>04-30</td>
+          <td>05-14</td>
+          <td>05-15</td>
+          <td><span class="remaining-badge rem-long">10天</span></td>
+          <td class="num-cell" data-val="124.00">124.00</td>
+          <td class="num-cell" data-val="111.80">111.80</td>
+          <td class="num-cell"><div class="dev-bar"><div class="bar-track"><div class="bar-pos" style="width:55%"></div></div><span class="positive">+10.91%</span></div></td>
+          <td class="num-cell" data-val="89.04">89.04</td>
+          <td class="num-cell"><div class="dev-bar"><div class="bar-track"><div class="bar-pos" style="width:100%"></div></div><span class="positive">+39.26%</span></div></td>
+          <td class="reason-cell" title="連續3日第一款">連續3日第一款</td>
+        </tr>
+      </tbody>
+    </table>
+    </div>
+  </div>
+
+  <div style="margin-top:12px;font-size:11px;color:#484f58;line-height:2">
+    ⓘ 十日線乖離率 = (現價 − MA10) ÷ MA10 × 100%　|　MA10 = 近10個交易日收盤均值<br>
+    ⓘ 月線乖離率 = (現價 − MA20) ÷ MA20 × 100%　|　MA20 = 近20個交易日收盤均值<br>
+    ⓘ 紅色 = 高於均線，綠色 = 低於均線　|　現價：上市用 TWSE MIS，上櫃用 Yahoo Finance<br>
+    ⚠️ 本頁資訊僅供研究參考，不構成投資建議
+  </div>
+
+</div>
+
+<footer>
+  資料來源：chengwaye.com / TWSE / TPEX ｜ 本頁資訊僅供研究參考，不構成投資建議
+</footer>
+
+<script>
+// ── 排序 ──────────────────────────────────────────────────────────────────────
+const table  = document.getElementById('mainTable');
+const tbody  = document.getElementById('tableBody');
+let sortCol  = 7;
+let sortAsc  = true;
+let allRows  = [];
+
+function sortTable(col) {
+  if (sortCol === col) sortAsc = !sortAsc;
+  else { sortCol = col; sortAsc = true; }
+  table.querySelectorAll('th').forEach((th, i) => {
+    th.classList.remove('sort-asc','sort-desc');
+    if (i === col) th.classList.add(sortAsc ? 'sort-asc' : 'sort-desc');
+  });
+  applyFilterAndSort();
+}
+
+function parseVal(td, col) {
+  const text = td.dataset.val ?? td.textContent.trim();
+  if (col >= 8) return parseFloat(text) || -Infinity;
+  if (col === 7) {
+    if (text === '出關') return -1;
+    return parseInt(text) || 999;
+  }
+  return text;
+}
+
+table.querySelectorAll('th[data-col]').forEach(th => {
+  th.addEventListener('click', () => sortTable(parseInt(th.dataset.col)));
+});
+
+// ── 搜尋 + 篩選 ───────────────────────────────────────────────────────────────
+let currentFilter = 'all';
+
+document.getElementById('searchBox').addEventListener('input', applyFilterAndSort);
+document.querySelectorAll('.filter-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    currentFilter = btn.dataset.filter;
+    applyFilterAndSort();
+  });
+});
+
+function applyFilterAndSort() {
+  const q    = document.getElementById('searchBox').value.toLowerCase();
+  const rows = Array.from(tbody.querySelectorAll('tr'));
+
+  // 過濾
+  rows.forEach(tr => {
+    const code  = (tr.dataset.code  || '').toLowerCase();
+    const name  = (tr.dataset.name  || '').toLowerCase();
+    const mkt   = tr.dataset.market || '';
+    const rem   = tr.dataset.rem    || '';
+    const dev   = parseFloat(tr.dataset.dev ?? 'NaN');
+
+    let show = true;
+    if (q && !code.includes(q) && !name.includes(q)) show = false;
+    if (currentFilter === 'exit'   && rem !== '出關') show = false;
+    if (currentFilter === 'pos'    && !(dev > 0))     show = false;
+    if (currentFilter === 'neg'    && !(dev < 0))     show = false;
+    if (currentFilter === 'market' && mkt !== '市')   show = false;
+    if (currentFilter === 'otc'    && mkt !== '櫃')   show = false;
+
+    tr.style.display = show ? '' : 'none';
+  });
+
+  // 排序可見列
+  const visible = rows.filter(tr => tr.style.display !== 'none');
+  visible.sort((a, b) => {
+    const va = parseVal(a.cells[sortCol], sortCol);
+    const vb = parseVal(b.cells[sortCol], sortCol);
+    if (va < vb) return sortAsc ? -1 : 1;
+    if (va > vb) return sortAsc ?  1 : -1;
+    return 0;
+  });
+  visible.forEach(tr => tbody.appendChild(tr));
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,10 @@
+__pycache__/
+*.pyc
+.venv/
+*.db
+*.log
+*.bat
+排程設定說明.md
+chengwaye.db
+scrape.log
+run_daily.log
