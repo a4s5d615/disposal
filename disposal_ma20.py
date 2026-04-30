@@ -744,15 +744,7 @@ def deviation_cell(dev):
     cls = "positive" if dev > 0 else "negative" if dev < 0 else "neutral"
     sign = "+" if dev > 0 else ""
     pct = f"{sign}{dev:.2f}%"
-
-    # mini bar（最大顯示 ±20%）
-    capped = min(abs(dev), 20) / 20 * 100
-    if dev > 0:
-        bar = f'<div class="bar-track"><div class="bar-pos" style="width:{capped:.0f}%"></div></div>'
-    else:
-        bar = f'<div class="bar-track"><div class="bar-neg" style="width:{capped:.0f}%"></div></div>'
-
-    return f'<div class="dev-bar">{bar}<span class="{cls}">{pct}</span></div>'
+    return f'<span class="{cls}">{pct}</span>'
 
 
 def render_html(stocks):
