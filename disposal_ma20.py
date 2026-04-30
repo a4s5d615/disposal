@@ -563,6 +563,10 @@ footer{{text-align:center;color:#484f58;font-size:11px;padding:24px;margin-top:2
       <div class="num" style="color:#8b949e">{cnt_no_data}</div>
       <div class="lbl">無法取得資料</div>
     </div>
+    <div class="kpi">
+      <div class="num" style="color:#d29922">{cnt_focus}</div>
+      <div class="lbl">重點關注</div>
+    </div>
   </div>
 
   <!-- 主表格 -->
@@ -579,6 +583,7 @@ footer{{text-align:center;color:#484f58;font-size:11px;padding:24px;margin-top:2
       <button class="filter-btn" data-filter="neg">乖離率 &lt;0%</button>
       <button class="filter-btn" data-filter="market">上市</button>
       <button class="filter-btn" data-filter="otc">上櫃</button>
+      <button class="filter-btn" data-filter="focus">⭐ 重點關注</button>
     </div>
     <div style="overflow-x:auto">
     <table id="mainTable">
@@ -598,6 +603,7 @@ footer{{text-align:center;color:#484f58;font-size:11px;padding:24px;margin-top:2
           <th data-col="11" class="num-cell">十日線乖離率</th>
           <th data-col="12" class="num-cell">MA20</th>
           <th data-col="13" class="num-cell">月線乖離率</th>
+          <th data-col="14" style="text-align:center" title="封關漲幅 -5%~-35% 且 月線乖離 -5%~+12%">重點關注</th>
           <th>處置原因</th>
         </tr>
       </thead>
@@ -686,6 +692,7 @@ function applyFilterAndSort() {{
     if (currentFilter === 'neg'    && !(dev < 0))     show = false;
     if (currentFilter === 'market' && mkt !== '市')   show = false;
     if (currentFilter === 'otc'    && mkt !== '櫃')   show = false;
+    if (currentFilter === 'focus'  && tr.dataset.focus !== '1') show = false;
 
     tr.style.display = show ? '' : 'none';
   }});
@@ -708,7 +715,7 @@ function applyFilterAndSort() {{
 
 ROW_TEMPLATE = """\
         <tr data-code="{code}" data-name="{name}" data-market="{market}"
-            data-rem="{remaining}" data-dev="{dev_val}" data-dev10="{dev10_val}">
+            data-rem="{remaining}" data-dev="{dev_val}" data-dev10="{dev10_val}" data-focus="{focus_flag}">
           <td class="{market_cls}">{market}</td>
           <td class="code-cell"><a href="https://goodinfo.tw/tw/StockInfo.asp?STOCK_ID={code}" target="_blank" rel="noopener">{code}</a></td>
           <td class="name-cell"><a href="https://tw.stock.yahoo.com/quote/{code}" target="_blank" rel="noopener">{name}</a></td>
@@ -723,6 +730,7 @@ ROW_TEMPLATE = """\
           <td class="num-cell">{dev10_cell}</td>
           <td class="num-cell" data-val="{ma20_raw}">{ma20_str}</td>
           <td class="num-cell">{dev_cell}</td>
+          <td style="text-align:center" data-val="{focus_val}">{focus_cell}</td>
           <td class="reason-cell" title="{reason}">{reason_short}</td>
         </tr>"""
 
@@ -752,11 +760,19 @@ def render_html(stocks):
     date  = now.strftime("%Y-%m-%d")
     now_s = now.strftime("%Y-%m-%d %H:%M:%S")
 
+    def is_focus(s):
+        g = s.get("gain_from_pre")
+        d = s.get("deviation")
+        return (g is not None and d is not None
+                and -35 <= g <= -5
+                and -5  <= d <= 12)
+
     total     = len(stocks)
     cnt_exit  = sum(1 for s in stocks if s["remaining"] == "出關")
     cnt_pos   = sum(1 for s in stocks if s["deviation"] is not None and s["deviation"] > 5)
     cnt_neg   = sum(1 for s in stocks if s["deviation"] is not None and s["deviation"] < -5)
     cnt_nodat = sum(1 for s in stocks if s["deviation"] is None)
+    cnt_focus = sum(1 for s in stocks if is_focus(s))
 
     rows_html = []
     for s in stocks:
@@ -766,6 +782,7 @@ def render_html(stocks):
         ma10     = s["ma10"]
         ma20     = s["ma20"]
         gain     = s.get("gain_from_pre")
+        focus    = is_focus(s)
         dev_val  = f"{dev:.2f}"  if dev  is not None else "nan"
         dev10_val= f"{dev10:.2f}" if dev10 is not None else "nan"
 
@@ -798,6 +815,9 @@ def render_html(stocks):
             ma20_raw    = f"{ma20:.2f}" if ma20 is not None else "",
             dev_cell    = deviation_cell(dev),
             dev_val     = dev_val,
+            focus_cell  = '<span style="color:#d29922;font-size:16px;font-weight:700">✓</span>' if focus else '<span class="no-data">—</span>',
+            focus_val   = "1" if focus else "0",
+            focus_flag  = "1" if focus else "0",
             reason      = reason,
             reason_short= reason_sh,
         ))
@@ -810,6 +830,7 @@ def render_html(stocks):
         cnt_pos_dev = cnt_pos,
         cnt_neg_dev = cnt_neg,
         cnt_no_data = cnt_nodat,
+        cnt_focus   = cnt_focus,
         rows      = "\n".join(rows_html),
     )
     return html
