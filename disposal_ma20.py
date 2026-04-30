@@ -140,11 +140,13 @@ def scrape_disposal_stocks():
                 "remaining": cell(7),
                 "reason":    cell(8),
                 # 待填入
-                "price":     None,
-                "ma10":      None,
-                "dev10":     None,
-                "ma20":      None,
-                "deviation": None,
+                "price":        None,
+                "ma10":         None,
+                "dev10":        None,
+                "ma20":         None,
+                "deviation":    None,
+                "pre_close":    None,   # 封關日前一個交易日收盤
+                "gain_from_pre": None,  # (現價 - pre_close) / pre_close × 100%
             })
         except Exception as e:
             print(f"  [parse] {e}", file=sys.stderr)
@@ -239,6 +241,129 @@ def collect_closes(code, market):
     return closes
 
 
+# ── 封關日前一個交易日收盤 ───────────────────────────────────────────────────────
+
+def twse_closes_for_month(code, year, month):
+    """上市：TWSE STOCK_DAY 月資料，回傳 [(date_str, close), ...]，date_str='YYYY-MM-DD'"""
+    url = "https://www.twse.com.tw/exchangeReport/STOCK_DAY"
+    r = fetch(url, params={
+        "response": "json",
+        "date": f"{year}{month:02d}01",
+        "stockNo": code,
+    })
+    if not r:
+        return []
+    try:
+        data = r.json()
+        if data.get("stat") != "OK":
+            return []
+        result = []
+        for row in data.get("data", []):
+            try:
+                # row[0] = "115/04/30"（民國年）
+                parts = row[0].split("/")
+                gre_year = int(parts[0]) + 1911
+                date_str = f"{gre_year}-{parts[1]}-{parts[2]}"
+                close = float(row[6].replace(",", ""))
+                result.append((date_str, close))
+            except Exception:
+                pass
+        return result
+    except Exception:
+        return []
+
+
+def yf_closes_range(code, suffix, range_start, range_end):
+    """Yahoo Finance: 取得指定區間的 [(date_str, close), ...]，date_str='YYYY-MM-DD'"""
+    p1 = int(range_start.timestamp())
+    p2 = int(range_end.timestamp())
+    url = f"{YF_BASE}/{code}.{suffix}"
+    try:
+        r = requests.get(
+            url,
+            params={"period1": p1, "period2": p2, "interval": "1d"},
+            headers=YF_HEADERS,
+            timeout=15,
+            verify=False,
+        )
+        if r.status_code != 200:
+            return []
+        result = r.json().get("chart", {}).get("result", [])
+        if not result:
+            return []
+        timestamps = result[0].get("timestamp", [])
+        closes_raw = result[0].get("indicators", {}).get("quote", [{}])[0].get("close", [])
+        pairs = []
+        for ts, c in zip(timestamps, closes_raw):
+            if c is None:
+                continue
+            # Yahoo Finance 時間戳是 UTC，台股以亞洲收盤時間對應日期
+            date_str = datetime.utcfromtimestamp(ts).strftime("%Y-%m-%d")
+            pairs.append((date_str, round(float(c), 2)))
+        return pairs
+    except Exception:
+        return []
+
+
+def pre_disposal_close(code, market, start_mmdd):
+    """
+    取得封關日前一個交易日的收盤價。
+    start_mmdd: 來自 chengwaye 的「開始」欄，格式 "MM-DD"
+    回傳 float 或 None
+    """
+    now = datetime.now()
+    try:
+        mm, dd = map(int, start_mmdd.split("-"))
+    except Exception:
+        return None
+
+    # 推算完整年份：若 MM-DD 晚於今天，則是去年
+    year = now.year
+    try:
+        start_dt = datetime(year, mm, dd)
+    except ValueError:
+        return None
+    if start_dt > now:
+        try:
+            start_dt = datetime(year - 1, mm, dd)
+        except ValueError:
+            return None
+
+    target = start_dt.strftime("%Y-%m-%d")
+
+    if market == "市":
+        # TWSE：取當月資料
+        y, m = start_dt.year, start_dt.month
+        rows = twse_closes_for_month(code, y, m)
+        time.sleep(REQUEST_DELAY)
+
+        # 找 target 之前最近的交易日
+        for date_str, close in reversed(rows):
+            if date_str < target:
+                return close
+
+        # 若 start_dt 在月初，需補前一個月
+        pm = m - 1 if m > 1 else 12
+        py = y if m > 1 else y - 1
+        prev_rows = twse_closes_for_month(code, py, pm)
+        time.sleep(REQUEST_DELAY)
+        for date_str, close in reversed(prev_rows):
+            if date_str < target:
+                return close
+        return None
+
+    else:
+        # 上櫃：Yahoo Finance 取前後區間
+        range_start = start_dt - timedelta(days=10)
+        range_end   = start_dt + timedelta(days=1)
+        pairs = yf_closes_range(code, "TWO", range_start, range_end)
+        time.sleep(REQUEST_DELAY)
+        for date_str, close in reversed(pairs):
+            if date_str < target:
+                return close
+        return None
+
+
 # ── 即時股價 ──────────────────────────────────────────────────────────────────
 
 def realtime_price(code, market):
@@ -306,14 +431,25 @@ def enrich_stock(stock):
     ma20  = round(sum(w20) / len(w20), 2)
     dev20 = round((price - ma20) / ma20 * 100, 2)
 
-    stock["price"]     = price
-    stock["ma10"]      = ma10
-    stock["dev10"]     = dev10
-    stock["ma20"]      = ma20
-    stock["deviation"] = dev20
+    # 封關日前一個交易日收盤
+    pre_close = pre_disposal_close(code, market, stock.get("start", ""))
+    gain_from_pre = (
+        round((price - pre_close) / pre_close * 100, 2)
+        if pre_close and pre_close > 0
+        else None
+    )
 
+    stock["price"]        = price
+    stock["ma10"]         = ma10
+    stock["dev10"]        = dev10
+    stock["ma20"]         = ma20
+    stock["deviation"]    = dev20
+    stock["pre_close"]    = pre_close
+    stock["gain_from_pre"] = gain_from_pre
+
+    pre_str = f"封關前={pre_close}({gain_from_pre:+.2f}%)  " if gain_from_pre is not None else ""
     print(
-        f"現價={price}  MA10={ma10}({dev10:+.2f}%)  MA20={ma20}({dev20:+.2f}%)",
+        f"現價={price}  {pre_str}MA10={ma10}({dev10:+.2f}%)  MA20={ma20}({dev20:+.2f}%)",
         flush=True
     )
 
@@ -457,10 +593,11 @@ footer{{text-align:center;color:#484f58;font-size:11px;padding:24px;margin-top:2
           <th data-col="6">出關日</th>
           <th data-col="7" class="sort-asc">剩餘</th>
           <th data-col="8" class="num-cell">現價</th>
-          <th data-col="9" class="num-cell">MA10</th>
-          <th data-col="10" class="num-cell">十日線乖離率</th>
-          <th data-col="11" class="num-cell">MA20</th>
-          <th data-col="12" class="num-cell">月線乖離率</th>
+          <th data-col="9" class="num-cell" title="(現價 - 封關日前一個交易日收盤) / 封關前收盤 × 100%">封關漲幅</th>
+          <th data-col="10" class="num-cell">MA10</th>
+          <th data-col="11" class="num-cell">十日線乖離率</th>
+          <th data-col="12" class="num-cell">MA20</th>
+          <th data-col="13" class="num-cell">月線乖離率</th>
           <th>處置原因</th>
         </tr>
       </thead>
@@ -472,9 +609,10 @@ footer{{text-align:center;color:#484f58;font-size:11px;padding:24px;margin-top:2
   </div>
 
   <div style="margin-top:12px;font-size:11px;color:#484f58;line-height:2">
+    ⓘ 封關漲幅 = (現價 − 封關日前一個交易日收盤) ÷ 封關前收盤 × 100%<br>
     ⓘ 十日線乖離率 = (現價 − MA10) ÷ MA10 × 100%　|　MA10 = 近10個交易日收盤均值<br>
     ⓘ 月線乖離率 = (現價 − MA20) ÷ MA20 × 100%　|　MA20 = 近20個交易日收盤均值<br>
-    ⓘ 紅色 = 高於均線，綠色 = 低於均線　|　現價：上市用 TWSE MIS，上櫃用 Yahoo Finance<br>
+    ⓘ 紅色 = 高於基準，綠色 = 低於基準　|　現價：上市用 TWSE MIS，上櫃用 Yahoo Finance<br>
     ⚠️ 本頁資訊僅供研究參考，不構成投資建議
   </div>
 
@@ -580,6 +718,7 @@ ROW_TEMPLATE = """\
           <td>{exit_date}</td>
           <td><span class="remaining-badge {rem_cls}">{remaining}</span></td>
           <td class="num-cell" data-val="{price_raw}">{price_str}</td>
+          <td class="num-cell" data-val="{gain_raw}">{gain_cell}</td>
           <td class="num-cell" data-val="{ma10_raw}">{ma10_str}</td>
           <td class="num-cell">{dev10_cell}</td>
           <td class="num-cell" data-val="{ma20_raw}">{ma20_str}</td>
@@ -634,6 +773,7 @@ def render_html(stocks):
         price    = s["price"]
         ma10     = s["ma10"]
         ma20     = s["ma20"]
+        gain     = s.get("gain_from_pre")
         dev_val  = f"{dev:.2f}"  if dev  is not None else "nan"
         dev10_val= f"{dev10:.2f}" if dev10 is not None else "nan"
 
@@ -656,6 +796,8 @@ def render_html(stocks):
             rem_cls     = remaining_class(s["remaining"]),
             price_str   = price_str,
             price_raw   = f"{price:.2f}" if price is not None else "",
+            gain_cell   = deviation_cell(gain),
+            gain_raw    = f"{gain:.2f}" if gain is not None else "",
             ma10_str    = ma10_str,
             ma10_raw    = f"{ma10:.2f}" if ma10 is not None else "",
             dev10_cell  = deviation_cell(dev10),

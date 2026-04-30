@@ -2,8 +2,8 @@ name: 每日更新處置清單
 
 on:
   schedule:
-    # 台灣時間 09:10（UTC+8） = UTC 01:10，週一到週五
-    - cron: '10 1 * * 1-5'
+    # 台灣時間 20:30（UTC+8） = UTC 12:30，週一到週五
+    - cron: '30 12 * * 1-5'
   workflow_dispatch:   # 允許手動觸發
 
 permissions:
