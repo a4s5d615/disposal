@@ -140,13 +140,15 @@ def scrape_disposal_stocks():
                 "remaining": cell(7),
                 "reason":    cell(8),
                 # 待填入
-                "price":        None,
-                "ma10":         None,
-                "dev10":        None,
-                "ma20":         None,
-                "deviation":    None,
-                "pre_close":    None,   # 封關日前一個交易日收盤
-                "gain_from_pre": None,  # (現價 - pre_close) / pre_close × 100%
+                "price":         None,
+                "high12":        None,   # 近12個交易日最高價
+                "gap_from_high": None,   # (現價 - high12) / high12 × 100%
+                "ma10":          None,
+                "dev10":         None,
+                "ma20":          None,
+                "deviation":     None,
+                "pre_close":     None,   # 封關日前一個交易日收盤
+                "gain_from_pre": None,   # (現價 - pre_close) / pre_close × 100%
             })
         except Exception as e:
             print(f"  [parse] {e}", file=sys.stderr)
@@ -182,6 +184,32 @@ def twse_monthly_closes(code, year, month):
         return []
 
 
+def twse_monthly_ohlc(code, year, month):
+    """上市：TWSE STOCK_DAY 月資料，回傳 (closes, highs)，一次 API 取兩者"""
+    url = "https://www.twse.com.tw/exchangeReport/STOCK_DAY"
+    r = fetch(url, params={
+        "response": "json",
+        "date": f"{year}{month:02d}01",
+        "stockNo": code,
+    })
+    if not r:
+        return [], []
+    try:
+        data = r.json()
+        if data.get("stat") != "OK":
+            return [], []
+        closes, highs = [], []
+        for row in data.get("data", []):
+            try:
+                highs.append(float(row[4].replace(",", "")))   # row[4]=最高價
+                closes.append(float(row[6].replace(",", "")))  # row[6]=收盤價
+            except Exception:
+                pass
+        return closes, highs
+    except Exception:
+        return [], []
+
+
 # ── 上櫃個股歷史收盤（Yahoo Finance） ────────────────────────────────────────
 
 YF_BASE = "https://query1.finance.yahoo.com/v8/finance/chart"
@@ -192,11 +220,7 @@ YF_HEADERS = {
 
 
 def yf_closes(code, suffix="TWO", days=35):
-    """
-    用 Yahoo Finance v8 API 取得上櫃個股近 N 天收盤。
-    suffix='TWO' 上櫃；suffix='TW' 上市（備用）
-    回傳 [close, ...] 由舊至新
-    """
+    """Yahoo Finance: 近N天收盤，回傳 [close, ...]（供 realtime_price 使用）"""
     end   = int(datetime.now().timestamp())
     start = int((datetime.now() - timedelta(days=days)).timestamp())
     url   = f"{YF_BASE}/{code}.{suffix}"
@@ -214,31 +238,57 @@ def yf_closes(code, suffix="TWO", days=35):
         if not result:
             return []
         closes_raw = result[0].get("indicators", {}).get("quote", [{}])[0].get("close", [])
-        # 過濾 None 值，並四捨五入至 2 位小數
         return [round(float(c), 2) for c in closes_raw if c is not None]
     except Exception:
         return []
 
 
+def yf_ohlc(code, suffix="TWO", days=35):
+    """Yahoo Finance: 近N天收盤＋最高，回傳 (closes, highs)，一次 API 取兩者"""
+    end   = int(datetime.now().timestamp())
+    start = int((datetime.now() - timedelta(days=days)).timestamp())
+    url   = f"{YF_BASE}/{code}.{suffix}"
+    try:
+        r = requests.get(
+            url,
+            params={"period1": start, "period2": end, "interval": "1d"},
+            headers=YF_HEADERS,
+            timeout=15,
+            verify=False,
+        )
+        if r.status_code != 200:
+            return [], []
+        result = r.json().get("chart", {}).get("result", [])
+        if not result:
+            return [], []
+        quote = result[0].get("indicators", {}).get("quote", [{}])[0]
+        closes = [round(float(c), 2) for c in quote.get("close", []) if c is not None]
+        highs  = [round(float(h), 2) for h in quote.get("high",  []) if h is not None]
+        return closes, highs
+    except Exception:
+        return [], []
+
+
 def collect_closes(code, market):
-    """取得近 20+ 個交易日收盤價。"""
+    """取得近 20+ 個交易日收盤價＋最高價，回傳 (closes, highs)。"""
     if market != "市":
-        closes = yf_closes(code, suffix="TWO", days=35)
+        closes, highs = yf_ohlc(code, suffix="TWO", days=35)
         time.sleep(REQUEST_DELAY)
-        return closes
+        return closes, highs
 
     # TWSE 上市：月資料（不足 20 日補前月）
     now = datetime.now()
     y, m = now.year, now.month
-    closes = twse_monthly_closes(code, y, m)
+    closes, highs = twse_monthly_ohlc(code, y, m)
     time.sleep(REQUEST_DELAY)
     if len(closes) < 20:
         pm = m - 1 if m > 1 else 12
         py = y if m > 1 else y - 1
-        prev = twse_monthly_closes(code, py, pm)
+        pc, ph = twse_monthly_ohlc(code, py, pm)
         time.sleep(REQUEST_DELAY)
-        closes = prev + closes
-    return closes
+        closes = pc + closes
+        highs  = ph + highs
+    return closes, highs
 
 
 # ── 封關日前一個交易日收盤 ───────────────────────────────────────────────────────
@@ -407,19 +457,26 @@ def enrich_stock(stock):
 
     print(f"  {code} {stock['name']} ({market}) ...", end=" ", flush=True)
 
-    closes = collect_closes(code, market)
+    closes, highs = collect_closes(code, market)
     if not closes:
         print("無收盤資料", flush=True)
         return
 
     if market != "市":
-        # 上櫃：Yahoo Finance 最後一筆即為當前價，無需再打一次 API
         price = closes[-1]
     else:
         price = realtime_price(code, market)
         time.sleep(REQUEST_DELAY)
         if price is None:
             price = closes[-1]
+
+    # 近12天高點
+    h12_window = highs[-12:] if len(highs) >= 12 else highs
+    high12 = max(h12_window) if h12_window else None
+    gap_from_high = (
+        round((price - high12) / high12 * 100, 2)
+        if high12 and high12 > 0 else None
+    )
 
     # MA10（十日線）
     w10   = closes[-10:] if len(closes) >= 10 else closes
@@ -440,6 +497,8 @@ def enrich_stock(stock):
     )
 
     stock["price"]        = price
+    stock["high12"]       = high12
+    stock["gap_from_high"] = gap_from_high
     stock["ma10"]         = ma10
     stock["dev10"]        = dev10
     stock["ma20"]         = ma20
@@ -447,9 +506,10 @@ def enrich_stock(stock):
     stock["pre_close"]    = pre_close
     stock["gain_from_pre"] = gain_from_pre
 
-    pre_str = f"封關前={pre_close}({gain_from_pre:+.2f}%)  " if gain_from_pre is not None else ""
+    pre_str  = f"封關前={pre_close}({gain_from_pre:+.2f}%)  " if gain_from_pre is not None else ""
+    high_str = f"12天高={high12}({gap_from_high:+.2f}%)  " if gap_from_high is not None else ""
     print(
-        f"現價={price}  {pre_str}MA10={ma10}({dev10:+.2f}%)  MA20={ma20}({dev20:+.2f}%)",
+        f"現價={price}  {pre_str}{high_str}MA20={ma20}({dev20:+.2f}%)",
         flush=True
     )
 
@@ -599,11 +659,12 @@ footer{{text-align:center;color:#484f58;font-size:11px;padding:24px;margin-top:2
           <th data-col="7" class="sort-asc">剩餘</th>
           <th data-col="8" class="num-cell">現價</th>
           <th data-col="9" class="num-cell" title="(現價 - 封關日前一個交易日收盤) / 封關前收盤 × 100%">封關漲幅</th>
-          <th data-col="10" class="num-cell">MA10</th>
-          <th data-col="11" class="num-cell">十日線乖離率</th>
-          <th data-col="12" class="num-cell">MA20</th>
-          <th data-col="13" class="num-cell">月線乖離率</th>
-          <th data-col="14" style="text-align:center" title="封關漲幅 -5%~-35% 且 月線乖離 -5%~+12%">重點關注</th>
+          <th data-col="10" class="num-cell" title="(現價 - 近12個交易日最高價) / 12天高點 × 100%">距12天高點</th>
+          <th data-col="11" class="num-cell">MA10</th>
+          <th data-col="12" class="num-cell">十日線乖離率</th>
+          <th data-col="13" class="num-cell">MA20</th>
+          <th data-col="14" class="num-cell">月線乖離率</th>
+          <th data-col="15" style="text-align:center" title="封關漲幅 -5%~-35% 且 月線乖離 -5%~+12%">重點關注</th>
           <th>處置原因</th>
         </tr>
       </thead>
@@ -616,6 +677,7 @@ footer{{text-align:center;color:#484f58;font-size:11px;padding:24px;margin-top:2
 
   <div style="margin-top:12px;font-size:11px;color:#484f58;line-height:2">
     ⓘ 封關漲幅 = (現價 − 封關日前一個交易日收盤) ÷ 封關前收盤 × 100%<br>
+    ⓘ 距12天高點 = (現價 − 近12個交易日最高價) ÷ 12天高點 × 100%（負值代表從高點回落）<br>
     ⓘ 十日線乖離率 = (現價 − MA10) ÷ MA10 × 100%　|　MA10 = 近10個交易日收盤均值<br>
     ⓘ 月線乖離率 = (現價 − MA20) ÷ MA20 × 100%　|　MA20 = 近20個交易日收盤均值<br>
     ⓘ 紅色 = 高於基準，綠色 = 低於基準　|　現價：上市用 TWSE MIS，上櫃用 Yahoo Finance<br>
@@ -726,6 +788,7 @@ ROW_TEMPLATE = """\
           <td><span class="remaining-badge {rem_cls}">{remaining}</span></td>
           <td class="num-cell" data-val="{price_raw}">{price_str}</td>
           <td class="num-cell" data-val="{gain_raw}">{gain_cell}</td>
+          <td class="num-cell" data-val="{gap_high_raw}">{gap_high_cell}</td>
           <td class="num-cell" data-val="{ma10_raw}">{ma10_str}</td>
           <td class="num-cell">{dev10_cell}</td>
           <td class="num-cell" data-val="{ma20_raw}">{ma20_str}</td>
@@ -781,8 +844,9 @@ def render_html(stocks):
         price    = s["price"]
         ma10     = s["ma10"]
         ma20     = s["ma20"]
-        gain     = s.get("gain_from_pre")
-        focus    = is_focus(s)
+        gain      = s.get("gain_from_pre")
+        gap_high  = s.get("gap_from_high")
+        focus     = is_focus(s)
         dev_val  = f"{dev:.2f}"  if dev  is not None else "nan"
         dev10_val= f"{dev10:.2f}" if dev10 is not None else "nan"
 
@@ -805,8 +869,10 @@ def render_html(stocks):
             rem_cls     = remaining_class(s["remaining"]),
             price_str   = price_str,
             price_raw   = f"{price:.2f}" if price is not None else "",
-            gain_cell   = deviation_cell(gain),
-            gain_raw    = f"{gain:.2f}" if gain is not None else "",
+            gain_cell    = deviation_cell(gain),
+            gain_raw     = f"{gain:.2f}" if gain is not None else "",
+            gap_high_cell= deviation_cell(gap_high),
+            gap_high_raw = f"{gap_high:.2f}" if gap_high is not None else "",
             ma10_str    = ma10_str,
             ma10_raw    = f"{ma10:.2f}" if ma10 is not None else "",
             dev10_cell  = deviation_cell(dev10),
