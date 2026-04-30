@@ -779,7 +779,7 @@ ROW_TEMPLATE = """\
         <tr data-code="{code}" data-name="{name}" data-market="{market}"
             data-rem="{remaining}" data-dev="{dev_val}" data-dev10="{dev10_val}" data-focus="{focus_flag}">
           <td class="{market_cls}">{market}</td>
-          <td class="code-cell"><a href="https://goodinfo.tw/tw/StockInfo.asp?STOCK_ID={code}" target="_blank" rel="noopener">{code}</a></td>
+          <td class="code-cell"><a href="{chart_url}" target="_blank" rel="noopener">{code}</a></td>
           <td class="name-cell"><a href="https://tw.stock.yahoo.com/quote/{code}" target="_blank" rel="noopener">{name}</a></td>
           <td><span class="interval-badge">{interval}</span></td>
           <td>{start}</td>
@@ -856,11 +856,15 @@ def render_html(stocks):
         reason    = s.get("reason", "")
         reason_sh = reason[:18] + "…" if len(reason) > 20 else reason
 
+        exchange  = "TWSE" if s["market"] == "市" else "TPEX"
+        chart_url = f"https://www.tradingview.com/chart/?symbol={exchange}:{s['code']}"
+
         rows_html.append(ROW_TEMPLATE.format(
             code        = s["code"],
             name        = s["name"],
             market      = s["market"],
             market_cls  = "market-m" if s["market"] == "市" else "market-k",
+            chart_url   = chart_url,
             interval    = s["interval"],
             start       = s["start"],
             end         = s["end"],
