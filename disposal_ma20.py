@@ -15,7 +15,7 @@ import sys
 import io
 import time
 import json
-import urllib3
+import urllib3 # type: ignore
 import requests
 from datetime import datetime, timedelta
 from pathlib import Path
